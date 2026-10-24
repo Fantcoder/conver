@@ -16,6 +16,17 @@ import { useUiStore } from '../../stores/ui-store';
 
 type PdfToolType = 'merge' | 'split' | 'rotate' | 'watermark' | 'compress';
 
+function getPathMeta(filePath: string) {
+  if (!filePath) return { dir: '.', name: '', baseName: '' };
+  const norm = filePath.replace(/\\/g, '/');
+  const lastSlash = norm.lastIndexOf('/');
+  const dir = lastSlash !== -1 ? filePath.substring(0, lastSlash) : '.';
+  const name = lastSlash !== -1 ? filePath.substring(lastSlash + 1) : filePath;
+  const lastDot = name.lastIndexOf('.');
+  const baseName = lastDot > 0 ? name.substring(0, lastDot) : name;
+  return { dir, name, baseName };
+}
+
 export const PdfWorkspace: React.FC = () => {
   const { showToast } = useUiStore();
   const [activeTool, setActiveTool] = useState<PdfToolType>('merge');
@@ -69,8 +80,8 @@ export const PdfWorkspace: React.FC = () => {
     setIsProcessing(true);
     setLastOutput(null);
     try {
-      const baseDir = mergeFiles[0].substring(0, mergeFiles[0].lastIndexOf('\\') || mergeFiles[0].lastIndexOf('/'));
-      const outputPath = `${baseDir}\\merged-document-${Date.now()}.pdf`;
+      const { dir } = getPathMeta(mergeFiles[0]);
+      const outputPath = `${dir}\\merged-document-${Date.now()}.pdf`;
       const result = await window.convertFlow.mergePdfs({
         files: mergeFiles,
         outputPath,
@@ -92,16 +103,19 @@ export const PdfWorkspace: React.FC = () => {
     setIsProcessing(true);
     setLastOutput(null);
     try {
-      const baseDir = selectedFile.substring(0, selectedFile.lastIndexOf('\\') || selectedFile.lastIndexOf('/'));
+      const { dir } = getPathMeta(selectedFile);
       const results = await window.convertFlow.splitPdf({
         filePath: selectedFile,
-        outputDir: baseDir,
+        outputDir: dir,
         mode: splitMode,
         ranges: splitRange,
       });
       if (results.length > 0) {
         setLastOutput(results[0]);
-        showToast(`Split into ${results.length} files successfully!`, 'success');
+        showToast(
+          `Split into ${results.length} files successfully!`,
+          'success',
+        );
       }
     } catch (err: any) {
       showToast(err?.message || 'Failed to split PDF', 'error');
@@ -118,9 +132,8 @@ export const PdfWorkspace: React.FC = () => {
     setIsProcessing(true);
     setLastOutput(null);
     try {
-      const baseDir = selectedFile.substring(0, selectedFile.lastIndexOf('\\') || selectedFile.lastIndexOf('/'));
-      const baseName = selectedFile.substring(selectedFile.lastIndexOf('\\') + 1 || selectedFile.lastIndexOf('/') + 1, selectedFile.lastIndexOf('.'));
-      const outputPath = `${baseDir}\\${baseName}-rotated-${rotateDeg}.pdf`;
+      const { dir, baseName } = getPathMeta(selectedFile);
+      const outputPath = `${dir}\\${baseName}-rotated-${rotateDeg}.pdf`;
 
       const result = await window.convertFlow.rotatePdf({
         filePath: selectedFile,
@@ -144,9 +157,8 @@ export const PdfWorkspace: React.FC = () => {
     setIsProcessing(true);
     setLastOutput(null);
     try {
-      const baseDir = selectedFile.substring(0, selectedFile.lastIndexOf('\\') || selectedFile.lastIndexOf('/'));
-      const baseName = selectedFile.substring(selectedFile.lastIndexOf('\\') + 1 || selectedFile.lastIndexOf('/') + 1, selectedFile.lastIndexOf('.'));
-      const outputPath = `${baseDir}\\${baseName}-watermarked.pdf`;
+      const { dir, baseName } = getPathMeta(selectedFile);
+      const outputPath = `${dir}\\${baseName}-watermarked.pdf`;
 
       const result = await window.convertFlow.watermarkPdf({
         filePath: selectedFile,
@@ -193,7 +205,8 @@ export const PdfWorkspace: React.FC = () => {
           PDF Studio Toolkit
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-          Powerful desktop PDF manipulation tools. Merge, split, rotate, watermark, and protect documents locally.
+          Powerful desktop PDF manipulation tools. Merge, split, rotate,
+          watermark, and protect documents locally.
         </p>
       </div>
 
@@ -214,7 +227,11 @@ export const PdfWorkspace: React.FC = () => {
           { id: 'merge', label: 'Merge PDFs', icon: <Combine size={16} /> },
           { id: 'split', label: 'Split Pages', icon: <Scissors size={16} /> },
           { id: 'rotate', label: 'Rotate Pages', icon: <RotateCw size={16} /> },
-          { id: 'watermark', label: 'Watermark Stamp', icon: <Stamp size={16} /> },
+          {
+            id: 'watermark',
+            label: 'Watermark Stamp',
+            icon: <Stamp size={16} />,
+          },
         ].map((tool) => (
           <button
             key={tool.id}
@@ -229,8 +246,12 @@ export const PdfWorkspace: React.FC = () => {
               padding: '8px 16px',
               borderRadius: 'var(--radius-md)',
               border: 'none',
-              background: activeTool === tool.id ? 'var(--accent-gradient)' : 'transparent',
-              color: activeTool === tool.id ? '#ffffff' : 'var(--text-secondary)',
+              background:
+                activeTool === tool.id
+                  ? 'var(--accent-gradient)'
+                  : 'transparent',
+              color:
+                activeTool === tool.id ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: activeTool === tool.id ? 600 : 500,
               fontSize: '13px',
               cursor: 'pointer',
@@ -255,12 +276,18 @@ export const PdfWorkspace: React.FC = () => {
             }}
           >
             <div>
-              <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Documents to Merge</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: 600 }}>
+                Documents to Merge
+              </h3>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Drag order using arrow buttons. Files are combined from top to bottom.
+                Drag order using arrow buttons. Files are combined from top to
+                bottom.
               </p>
             </div>
-            <button className="btn btn-secondary" onClick={handlePickMergeFiles}>
+            <button
+              className="btn btn-secondary"
+              onClick={handlePickMergeFiles}
+            >
               <Plus size={15} /> Add PDF Files
             </button>
           </div>
@@ -277,8 +304,18 @@ export const PdfWorkspace: React.FC = () => {
                 background: 'rgba(255, 255, 255, 0.02)',
               }}
             >
-              <FileText size={36} color="var(--accent-primary)" style={{ marginBottom: '12px' }} />
-              <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+              <FileText
+                size={36}
+                color="var(--accent-primary)"
+                style={{ marginBottom: '12px' }}
+              />
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  marginBottom: '4px',
+                }}
+              >
                 No PDF files selected yet
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
@@ -286,9 +323,16 @@ export const PdfWorkspace: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                marginBottom: '24px',
+              }}
+            >
               {mergeFiles.map((fp, idx) => {
-                const name = fp.substring(fp.lastIndexOf('\\') + 1 || fp.lastIndexOf('/') + 1);
+                const name = getPathMeta(fp).name;
                 return (
                   <div
                     key={fp + idx}
@@ -302,13 +346,27 @@ export const PdfWorkspace: React.FC = () => {
                       border: '1px solid var(--border-subtle)',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                      }}
+                    >
                       <span className="badge badge-primary">{idx + 1}</span>
                       <FileText size={18} color="var(--accent-primary)" />
-                      <span style={{ fontSize: '13px', fontWeight: 500 }}>{name}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 500 }}>
+                        {name}
+                      </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
                       <button
                         className="btn btn-ghost"
                         style={{ padding: '6px' }}
@@ -339,7 +397,12 @@ export const PdfWorkspace: React.FC = () => {
 
               <button
                 className="btn btn-primary"
-                style={{ padding: '12px 24px', fontSize: '14px', alignSelf: 'flex-start', marginTop: '12px' }}
+                style={{
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  alignSelf: 'flex-start',
+                  marginTop: '12px',
+                }}
                 disabled={isProcessing}
                 onClick={handleMerge}
               >
@@ -355,14 +418,23 @@ export const PdfWorkspace: React.FC = () => {
       {activeTool === 'split' && (
         <div style={{ maxWidth: '640px' }}>
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Select Target PDF</h3>
+            <h3
+              style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}
+            >
+              Select Target PDF
+            </h3>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button className="btn btn-secondary" onClick={handlePickSingleFile}>
+              <button
+                className="btn btn-secondary"
+                onClick={handlePickSingleFile}
+              >
                 Choose PDF File
               </button>
               {selectedFile && (
-                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  {selectedFile.substring(selectedFile.lastIndexOf('\\') + 1 || selectedFile.lastIndexOf('/') + 1)}
+                <span
+                  style={{ fontSize: '13px', color: 'var(--text-secondary)' }}
+                >
+                  {getPathMeta(selectedFile).name}
                 </span>
               )}
             </div>
@@ -381,11 +453,26 @@ export const PdfWorkspace: React.FC = () => {
               }}
             >
               <div>
-                <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                <label
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                    display: 'block',
+                    marginBottom: '8px',
+                  }}
+                >
                   Split Mode
                 </label>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                    }}
+                  >
                     <input
                       type="radio"
                       name="splitMode"
@@ -394,7 +481,15 @@ export const PdfWorkspace: React.FC = () => {
                     />
                     Extract Every Page as a Separate PDF
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                    }}
+                  >
                     <input
                       type="radio"
                       name="splitMode"
@@ -408,7 +503,14 @@ export const PdfWorkspace: React.FC = () => {
 
               {splitMode === 'ranges' && (
                 <div>
-                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                  <label
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--text-muted)',
+                      display: 'block',
+                      marginBottom: '6px',
+                    }}
+                  >
                     Page Ranges (e.g. 1-3, 5, 8-10)
                   </label>
                   <input
@@ -439,14 +541,23 @@ export const PdfWorkspace: React.FC = () => {
       {activeTool === 'rotate' && (
         <div style={{ maxWidth: '640px' }}>
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Select Target PDF</h3>
+            <h3
+              style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}
+            >
+              Select Target PDF
+            </h3>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button className="btn btn-secondary" onClick={handlePickSingleFile}>
+              <button
+                className="btn btn-secondary"
+                onClick={handlePickSingleFile}
+              >
                 Choose PDF File
               </button>
               {selectedFile && (
-                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  {selectedFile.substring(selectedFile.lastIndexOf('\\') + 1 || selectedFile.lastIndexOf('/') + 1)}
+                <span
+                  style={{ fontSize: '13px', color: 'var(--text-secondary)' }}
+                >
+                  {getPathMeta(selectedFile).name}
                 </span>
               )}
             </div>
@@ -465,7 +576,14 @@ export const PdfWorkspace: React.FC = () => {
               }}
             >
               <div>
-                <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                <label
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                    display: 'block',
+                    marginBottom: '8px',
+                  }}
+                >
                   Rotation Angle
                 </label>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -506,14 +624,23 @@ export const PdfWorkspace: React.FC = () => {
       {activeTool === 'watermark' && (
         <div style={{ maxWidth: '640px' }}>
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Select Target PDF</h3>
+            <h3
+              style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}
+            >
+              Select Target PDF
+            </h3>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button className="btn btn-secondary" onClick={handlePickSingleFile}>
+              <button
+                className="btn btn-secondary"
+                onClick={handlePickSingleFile}
+              >
                 Choose PDF File
               </button>
               {selectedFile && (
-                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  {selectedFile.substring(selectedFile.lastIndexOf('\\') + 1 || selectedFile.lastIndexOf('/') + 1)}
+                <span
+                  style={{ fontSize: '13px', color: 'var(--text-secondary)' }}
+                >
+                  {getPathMeta(selectedFile).name}
                 </span>
               )}
             </div>
@@ -532,7 +659,14 @@ export const PdfWorkspace: React.FC = () => {
               }}
             >
               <div>
-                <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                <label
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                    display: 'block',
+                    marginBottom: '6px',
+                  }}
+                >
                   Watermark Stamp Text
                 </label>
                 <input
@@ -545,7 +679,15 @@ export const PdfWorkspace: React.FC = () => {
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                    marginBottom: '6px',
+                  }}
+                >
                   <span>Opacity</span>
                   <span>{watermarkOpacity}%</span>
                 </div>
@@ -566,7 +708,9 @@ export const PdfWorkspace: React.FC = () => {
                 onClick={handleWatermark}
               >
                 <Stamp size={15} />
-                {isProcessing ? 'Stamping Watermark...' : 'Apply Watermark to All Pages'}
+                {isProcessing
+                  ? 'Stamping Watermark...'
+                  : 'Apply Watermark to All Pages'}
               </button>
             </div>
           )}
@@ -591,7 +735,9 @@ export const PdfWorkspace: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <CheckCircle2 size={20} color="var(--color-success)" />
-            <span style={{ fontSize: '13px', fontWeight: 600 }}>Operation finished successfully!</span>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>
+              Operation finished successfully!
+            </span>
           </div>
 
           <div style={{ display: 'flex', gap: '8px' }}>

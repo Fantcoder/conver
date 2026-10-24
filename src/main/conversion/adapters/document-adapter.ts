@@ -15,7 +15,7 @@ export async function processDocumentConversion(
   capability: ConversionCapability,
   options: Record<string, any>,
   targetDir: string,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<DocumentConversionResult> {
   onProgress?.(20, 'Reading document text...');
   const text = await fs.promises.readFile(file.path, 'utf-8');

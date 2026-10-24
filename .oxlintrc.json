@@ -3,10 +3,5 @@
   "categories": {
     "correctness": "warn"
   },
-  "ignorePatterns": [
-    ".webpack/**",
-    "out/**",
-    "node_modules/**",
-    "dist/**"
-  ]
+  "ignorePatterns": [".webpack/**", "out/**", "node_modules/**", "dist/**"]
 }

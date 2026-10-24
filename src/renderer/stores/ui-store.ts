@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
-export type NavigationTab = 'convert' | 'pdf' | 'batch' | 'history' | 'settings';
+export type NavigationTab =
+  | 'convert'
+  | 'pdf'
+  | 'batch'
+  | 'history'
+  | 'settings';
 
 export interface ToastMessage {
   id: string;

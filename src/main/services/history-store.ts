@@ -27,7 +27,9 @@ export async function getHistory(): Promise<HistoryItem[]> {
   return cachedHistory;
 }
 
-export async function addHistoryItem(item: HistoryItem): Promise<HistoryItem[]> {
+export async function addHistoryItem(
+  item: HistoryItem,
+): Promise<HistoryItem[]> {
   const list = await getHistory();
   const updated = [item, ...list.filter((x) => x.id !== item.id)].slice(0, 100);
   cachedHistory = updated;
@@ -35,7 +37,11 @@ export async function addHistoryItem(item: HistoryItem): Promise<HistoryItem[]> 
   const filePath = getHistoryPath();
   try {
     await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.promises.writeFile(filePath, JSON.stringify(updated, null, 2), 'utf-8');
+    await fs.promises.writeFile(
+      filePath,
+      JSON.stringify(updated, null, 2),
+      'utf-8',
+    );
   } catch (err) {
     console.error('Failed to write history:', err);
   }
@@ -50,7 +56,11 @@ export async function removeHistoryItem(id: string): Promise<boolean> {
 
   const filePath = getHistoryPath();
   try {
-    await fs.promises.writeFile(filePath, JSON.stringify(filtered, null, 2), 'utf-8');
+    await fs.promises.writeFile(
+      filePath,
+      JSON.stringify(filtered, null, 2),
+      'utf-8',
+    );
     return true;
   } catch {
     return false;

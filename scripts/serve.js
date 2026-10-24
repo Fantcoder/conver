@@ -20,7 +20,8 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
   let reqPath = req.url.split('?')[0];
-  if (reqPath === '/' || reqPath === '/main_window') reqPath = '/main_window/index.html';
+  if (reqPath === '/' || reqPath === '/main_window')
+    reqPath = '/main_window/index.html';
 
   const filePath = path.join(ROOT, reqPath);
 
@@ -44,5 +45,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`ConvertFlow Web Server running at http://localhost:${PORT}/main_window/index.html`);
+  console.log(
+    `ConvertFlow Web Server running at http://localhost:${PORT}/main_window/index.html`,
+  );
 });

@@ -1,10 +1,21 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { BrowserWindow } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
-import { ConversionCapability, ConversionJob, FileItem } from '../../shared/types';
+import {
+  ConversionCapability,
+  ConversionJob,
+  FileItem,
+} from '../../shared/types';
 import { IPC_CHANNELS } from '../../shared/ipc-channels';
 import { processImageConversion } from './adapters/image-adapter';
-import { compressPdf } from './adapters/pdf-adapter';
+import {
+  compressPdf,
+  encryptPdf,
+  rotatePdf,
+  splitPdf,
+  watermarkPdf,
+} from './adapters/pdf-adapter';
 import { processDataConversion } from './adapters/data-adapter';
 import { processDocumentConversion } from './adapters/document-adapter';
 import { processArchiveConversion } from './adapters/archive-adapter';
@@ -60,14 +71,15 @@ function notifyJobStatus(job: ConversionJob) {
 export async function runConversionJob(
   file: FileItem,
   capability: ConversionCapability,
-  options: Record<string, any>
+  options: Record<string, any>,
 ): Promise<string> {
   const jobId = uuidv4();
   const settings = await loadSettings();
 
-  const targetDir = settings.outputDirectory && settings.outputDirectory.trim().length > 0
-    ? settings.outputDirectory
-    : path.dirname(file.path);
+  const targetDir =
+    settings.outputDirectory && settings.outputDirectory.trim().length > 0
+      ? path.normalize(path.resolve(settings.outputDirectory))
+      : path.normalize(path.dirname(file.path));
 
   const job: ConversionJob = {
     id: jobId,
@@ -89,7 +101,8 @@ export async function runConversionJob(
   (async () => {
     try {
       const onProgress = (pct: number, stage?: string) => {
-        if (cancelledJobs.has(jobId)) throw new Error('Job was cancelled by user');
+        if (cancelledJobs.has(jobId))
+          throw new Error('Job was cancelled by user');
         job.progress = pct;
         job.stage = stage;
         notifyJobProgress(job);
@@ -101,17 +114,103 @@ export async function runConversionJob(
       const cat = file.category;
 
       if (cat === 'image' || capId.startsWith('img-')) {
-        result = await processImageConversion(file, capability, options, targetDir, onProgress);
+        result = await processImageConversion(
+          file,
+          capability,
+          options,
+          targetDir,
+          onProgress,
+        );
       } else if (capId === 'pdf-compress') {
         result = await compressPdf(file, targetDir, onProgress);
+      } else if (capId === 'pdf-rotate') {
+        const baseName = path.parse(file.name).name;
+        const outputPath = path.join(targetDir, `${baseName}-rotated.pdf`);
+        await rotatePdf(
+          {
+            filePath: file.path,
+            outputPath,
+            degrees: (Number(options.degrees) || 90) as 90 | 180 | 270,
+          },
+          onProgress,
+        );
+        const stats = await fs.promises.stat(outputPath);
+        result = { outputPath, outputSize: stats.size };
+      } else if (capId === 'pdf-watermark') {
+        const baseName = path.parse(file.name).name;
+        const outputPath = path.join(targetDir, `${baseName}-watermarked.pdf`);
+        await watermarkPdf(
+          {
+            filePath: file.path,
+            outputPath,
+            text: options.text || 'CONFIDENTIAL',
+            opacity: Number(options.opacity || 30),
+          },
+          onProgress,
+        );
+        const stats = await fs.promises.stat(outputPath);
+        result = { outputPath, outputSize: stats.size };
+      } else if (capId === 'pdf-split') {
+        const createdFiles = await splitPdf(
+          {
+            filePath: file.path,
+            outputDir: targetDir,
+            mode: options.mode || 'all',
+            ranges: options.ranges,
+          },
+          onProgress,
+        );
+        const outputPath = createdFiles[0] || targetDir;
+        let outputSize = 0;
+        try {
+          const stats = await fs.promises.stat(outputPath);
+          outputSize = stats.size;
+        } catch {}
+        result = { outputPath, outputSize };
+      } else if (capId === 'pdf-encrypt') {
+        const baseName = path.parse(file.name).name;
+        const outputPath = path.join(targetDir, `${baseName}-protected.pdf`);
+        await encryptPdf(
+          {
+            filePath: file.path,
+            outputPath,
+            userPassword: options.userPassword || '',
+          },
+          onProgress,
+        );
+        const stats = await fs.promises.stat(outputPath);
+        result = { outputPath, outputSize: stats.size };
       } else if (cat === 'data') {
-        result = await processDataConversion(file, capability, options, targetDir, onProgress);
+        result = await processDataConversion(
+          file,
+          capability,
+          options,
+          targetDir,
+          onProgress,
+        );
       } else if (cat === 'document') {
-        result = await processDocumentConversion(file, capability, options, targetDir, onProgress);
-      } else if (capId.startsWith('compress-to-') || capId === 'extract-archive') {
-        result = await processArchiveConversion(file, capability, options, targetDir, onProgress);
+        result = await processDocumentConversion(
+          file,
+          capability,
+          options,
+          targetDir,
+          onProgress,
+        );
+      } else if (
+        capId.startsWith('compress-to-') ||
+        capId === 'extract-archive'
+      ) {
+        result = await processArchiveConversion(
+          file,
+          capability,
+          options,
+          targetDir,
+          onProgress,
+        );
       } else {
-        throw new Error(`Unsupported conversion operation: ${capability.label}`);
+        throw new Error(
+          `Unsupported conversion operation: ${capability.label}`,
+        );
       }
 
       job.status = 'completed';

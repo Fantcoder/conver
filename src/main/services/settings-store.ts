@@ -42,14 +42,20 @@ export async function loadSettings(): Promise<AppSettings> {
   return cachedSettings;
 }
 
-export async function saveSettings(partial: Partial<AppSettings>): Promise<AppSettings> {
+export async function saveSettings(
+  partial: Partial<AppSettings>,
+): Promise<AppSettings> {
   const current = await loadSettings();
   cachedSettings = { ...current, ...partial };
 
   const filePath = getSettingsPath();
   try {
     await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.promises.writeFile(filePath, JSON.stringify(cachedSettings, null, 2), 'utf-8');
+    await fs.promises.writeFile(
+      filePath,
+      JSON.stringify(cachedSettings, null, 2),
+      'utf-8',
+    );
   } catch (err) {
     console.error('Failed to save settings:', err);
   }

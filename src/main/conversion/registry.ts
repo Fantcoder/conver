@@ -142,7 +142,8 @@ export function getCapabilitiesForFile(file: FileItem): ConversionCapability[] {
       targetExtension: ext,
       targetMimeType: file.mimeType,
       icon: 'minimize-2',
-      description: 'Smart compression to shrink file size while preserving quality',
+      description:
+        'Smart compression to shrink file size while preserving quality',
       estimatedSpeed: 'fast',
       lossless: false,
       badge: 'Shrink',
@@ -240,53 +241,10 @@ export function getCapabilitiesForFile(file: FileItem): ConversionCapability[] {
 
   // ==================== PDF CAPABILITIES ====================
   if (cat === 'pdf') {
-    // 1. PDF to PNG
-    capabilities.push({
-      id: 'pdf-to-png',
-      label: 'Extract Pages as PNG',
-      category: 'convert',
-      targetFormat: 'PNG',
-      targetExtension: 'png',
-      targetMimeType: 'image/png',
-      icon: 'image',
-      description: 'Convert PDF pages into high-resolution PNG images',
-      estimatedSpeed: 'fast',
-      lossless: true,
-      badge: 'Popular',
-      priority: 100,
-    });
-
-    // 2. PDF to JPG
-    capabilities.push({
-      id: 'pdf-to-jpg',
-      label: 'Extract Pages as JPG',
-      category: 'convert',
-      targetFormat: 'JPG',
-      targetExtension: 'jpg',
-      targetMimeType: 'image/jpeg',
-      icon: 'image',
-      description: 'Convert PDF pages into compact JPG photos',
-      estimatedSpeed: 'fast',
-      lossless: false,
-      priority: 95,
-      options: [
-        {
-          id: 'quality',
-          label: 'Quality',
-          type: 'slider',
-          defaultValue: 85,
-          min: 20,
-          max: 100,
-          step: 5,
-          unit: '%',
-        },
-      ],
-    });
-
-    // 3. Compress PDF
+    // 1. Compress PDF
     capabilities.push({
       id: 'pdf-compress',
-      label: 'Compress PDF',
+      label: 'Compress & Optimize PDF',
       category: 'compress',
       targetFormat: 'PDF',
       targetExtension: 'pdf',
@@ -295,7 +253,8 @@ export function getCapabilitiesForFile(file: FileItem): ConversionCapability[] {
       description: 'Optimize PDF structure and compress embedded objects',
       estimatedSpeed: 'fast',
       lossless: true,
-      priority: 90,
+      badge: 'Recommended',
+      priority: 100,
     });
 
     // 4. Split PDF
@@ -369,7 +328,8 @@ export function getCapabilitiesForFile(file: FileItem): ConversionCapability[] {
       targetExtension: 'pdf',
       targetMimeType: 'application/pdf',
       icon: 'stamp',
-      description: 'Add a customized copyright or security stamp across all pages',
+      description:
+        'Add a customized copyright or security stamp across all pages',
       estimatedSpeed: 'fast',
       lossless: true,
       priority: 75,
@@ -402,7 +362,8 @@ export function getCapabilitiesForFile(file: FileItem): ConversionCapability[] {
       targetExtension: 'pdf',
       targetMimeType: 'application/pdf',
       icon: 'lock',
-      description: 'Secure document with military-grade AES password protection',
+      description:
+        'Secure document with military-grade AES password protection',
       estimatedSpeed: 'fast',
       lossless: true,
       priority: 70,

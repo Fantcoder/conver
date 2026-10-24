@@ -16,7 +16,7 @@ export async function processDataConversion(
   capability: ConversionCapability,
   options: Record<string, any>,
   targetDir: string,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<DataConversionResult> {
   onProgress?.(20, 'Reading raw source data...');
   const rawContent = await fs.promises.readFile(file.path, 'utf-8');
@@ -51,7 +51,22 @@ export async function processDataConversion(
   if (targetExt === 'json') {
     outputContent = JSON.stringify(parsedData, null, 2);
   } else if (targetExt === 'csv') {
-    const records = Array.isArray(parsedData) ? parsedData : [parsedData];
+    let records: any[] = [];
+    if (Array.isArray(parsedData)) {
+      records = parsedData;
+    } else if (typeof parsedData === 'object' && parsedData !== null) {
+      const arrayKey = Object.keys(parsedData).find(
+        (k) =>
+          Array.isArray(parsedData[k]) && typeof parsedData[k][0] === 'object',
+      );
+      if (arrayKey) {
+        records = parsedData[arrayKey];
+      } else {
+        records = [parsedData];
+      }
+    } else {
+      records = [{ value: parsedData }];
+    }
     outputContent = stringify(records, { header: true });
   } else if (targetExt === 'yaml') {
     outputContent = yaml.dump(parsedData, { indent: 2 });

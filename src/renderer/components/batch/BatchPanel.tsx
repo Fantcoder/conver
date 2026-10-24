@@ -13,12 +13,15 @@ import { useConversionStore } from '../../stores/conversion-store';
 import { useUiStore } from '../../stores/ui-store';
 
 export const BatchPanel: React.FC = () => {
-  const { files, loadFilesFromPaths, removeFile, clearFiles } = useConversionStore();
+  const { files, loadFilesFromPaths, removeFile, clearFiles } =
+    useConversionStore();
   const { showToast } = useUiStore();
 
   const [universalTarget, setUniversalTarget] = useState<string>('WEBP');
   const [isConvertingBatch, setIsConvertingBatch] = useState(false);
-  const [completedMap, setCompletedMap] = useState<Record<string, { status: string; path?: string }>>({});
+  const [completedMap, setCompletedMap] = useState<
+    Record<string, { status: string; path?: string }>
+  >({});
 
   const handleAddFiles = async () => {
     if (window.convertFlow) {
@@ -42,9 +45,11 @@ export const BatchPanel: React.FC = () => {
       const f = files[i];
       try {
         const caps = await window.convertFlow.getCapabilities(f);
-        const match = caps.find(
-          (c) => c.targetFormat.toUpperCase() === universalTarget.toUpperCase()
-        ) || caps[0];
+        const match =
+          caps.find(
+            (c) =>
+              c.targetFormat.toUpperCase() === universalTarget.toUpperCase(),
+          ) || caps[0];
 
         if (match) {
           await window.convertFlow.startJob({
@@ -92,11 +97,14 @@ export const BatchPanel: React.FC = () => {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '6px' }}>
+          <h1
+            style={{ fontSize: '26px', fontWeight: 700, marginBottom: '6px' }}
+          >
             Batch Conversion Queue
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            Convert multiple files simultaneously with batch optimization presets.
+            Convert multiple files simultaneously with batch optimization
+            presets.
           </p>
         </div>
 
@@ -126,8 +134,14 @@ export const BatchPanel: React.FC = () => {
             margin: '40px auto',
           }}
         >
-          <Layers size={44} color="var(--accent-primary)" style={{ marginBottom: '16px' }} />
-          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
+          <Layers
+            size={44}
+            color="var(--accent-primary)"
+            style={{ marginBottom: '16px' }}
+          />
+          <h3
+            style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}
+          >
             No files in batch queue
           </h3>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -196,7 +210,13 @@ export const BatchPanel: React.FC = () => {
                     border: '1px solid var(--border-subtle)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                    }}
+                  >
                     <div
                       style={{
                         width: '36px',
@@ -217,21 +237,37 @@ export const BatchPanel: React.FC = () => {
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600 }}>{file.name}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600 }}>
+                        {file.name}
+                      </div>
+                      <div
+                        style={{ fontSize: '11px', color: 'var(--text-muted)' }}
+                      >
                         {file.extension.toUpperCase()} • {formatSize(file.size)}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                    }}
+                  >
                     {status === 'completed' && (
                       <span className="badge badge-success">
                         <CheckCircle2 size={12} /> Ready
                       </span>
                     )}
                     {status === 'failed' && (
-                      <span className="badge" style={{ background: 'var(--color-error-bg)', color: 'var(--color-error)' }}>
+                      <span
+                        className="badge"
+                        style={{
+                          background: 'var(--color-error-bg)',
+                          color: 'var(--color-error)',
+                        }}
+                      >
                         <AlertCircle size={12} /> Failed
                       </span>
                     )}

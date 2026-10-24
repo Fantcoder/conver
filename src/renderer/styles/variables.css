@@ -22,8 +22,17 @@
   /* Accent Colors */
   --accent-primary: #6366f1; /* Indigo */
   --accent-primary-hover: #4f46e5;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-  --accent-gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+  --accent-gradient: linear-gradient(
+    135deg,
+    #6366f1 0%,
+    #a855f7 50%,
+    #ec4899 100%
+  );
+  --accent-gradient-subtle: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.15) 0%,
+    rgba(168, 85, 247, 0.15) 100%
+  );
   --accent-glow: rgba(99, 102, 241, 0.35);
 
   --color-success: #10b981;
@@ -50,7 +59,8 @@
   --radius-full: 9999px;
 
   /* Fonts */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Outfit', 'Inter', -apple-system, sans-serif;
 
   /* Layout dimensions */
@@ -59,7 +69,7 @@
   --statusbar-height: 32px;
 }
 
-[data-theme="light"] {
+[data-theme='light'] {
   --bg-app: #f4f6fa;
   --bg-sidebar: rgba(248, 250, 252, 0.9);
   --bg-card: rgba(255, 255, 255, 0.85);

@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import { IPC_CHANNELS } from '../../shared/ipc-channels';
@@ -5,6 +6,7 @@ import { inspectFile } from '../conversion/format-detection';
 import { getCapabilitiesForFile } from '../conversion/registry';
 import { cancelJob, runConversionJob } from '../conversion/job-manager';
 import {
+  encryptPdf,
   getPdfDetails,
   mergePdfs,
   rotatePdf,
@@ -12,10 +14,15 @@ import {
   watermarkPdf,
 } from '../conversion/adapters/pdf-adapter';
 import { loadSettings, saveSettings } from '../services/settings-store';
-import { clearHistory, getHistory, removeHistoryItem } from '../services/history-store';
+import {
+  clearHistory,
+  getHistory,
+  removeHistoryItem,
+} from '../services/history-store';
 import {
   ConversionCapability,
   FileItem,
+  PdfEncryptOptions,
   PdfMergeOptions,
   PdfRotateOptions,
   PdfSplitOptions,
@@ -56,8 +63,36 @@ export function registerIpcHandlers(): void {
     return inspectFile(filePath);
   });
 
-  ipcMain.handle(IPC_CHANNELS.FILE_INSPECT_MANY, async (_, filePaths: string[]) => {
-    return Promise.all(filePaths.map((fp) => inspectFile(fp)));
+  ipcMain.handle(
+    IPC_CHANNELS.FILE_INSPECT_MANY,
+    async (_, filePaths: string[]) => {
+      return Promise.all(filePaths.map((fp) => inspectFile(fp)));
+    },
+  );
+
+  ipcMain.handle(IPC_CHANNELS.FILE_SAVE_COPY, async (_, sourcePath: string) => {
+    try {
+      if (!sourcePath) return false;
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      const baseName = path.basename(sourcePath);
+      const ext = path.extname(sourcePath).replace(/^\./, '');
+      const dialogOpts = {
+        title: 'Save Converted Copy',
+        defaultPath: baseName,
+        filters: ext
+          ? [{ name: `${ext.toUpperCase()} File`, extensions: [ext] }]
+          : undefined,
+      };
+      const result = focusedWindow
+        ? await dialog.showSaveDialog(focusedWindow, dialogOpts)
+        : await dialog.showSaveDialog(dialogOpts);
+      if (result.canceled || !result.filePath) return false;
+      await fs.copyFile(sourcePath, result.filePath);
+      return true;
+    } catch (err) {
+      console.error('Failed to save copy:', err);
+      return false;
+    }
   });
 
   // ==================== CAPABILITIES & JOBS ====================
@@ -69,10 +104,18 @@ export function registerIpcHandlers(): void {
     IPC_CHANNELS.START_JOB,
     async (
       _,
-      payload: { file: FileItem; capability: ConversionCapability; options: Record<string, any> }
+      payload: {
+        file: FileItem;
+        capability: ConversionCapability;
+        options: Record<string, any>;
+      },
     ) => {
-      return runConversionJob(payload.file, payload.capability, payload.options);
-    }
+      return runConversionJob(
+        payload.file,
+        payload.capability,
+        payload.options,
+      );
+    },
   );
 
   ipcMain.handle(IPC_CHANNELS.CANCEL_JOB, async (_, jobId: string) => {
@@ -84,21 +127,40 @@ export function registerIpcHandlers(): void {
     return getPdfDetails(filePath);
   });
 
-  ipcMain.handle(IPC_CHANNELS.PDF_MERGE, async (_, options: PdfMergeOptions) => {
-    return mergePdfs(options);
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.PDF_MERGE,
+    async (_, options: PdfMergeOptions) => {
+      return mergePdfs(options);
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.PDF_SPLIT, async (_, options: PdfSplitOptions) => {
-    return splitPdf(options);
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.PDF_SPLIT,
+    async (_, options: PdfSplitOptions) => {
+      return splitPdf(options);
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.PDF_ROTATE, async (_, options: PdfRotateOptions) => {
-    return rotatePdf(options);
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.PDF_ROTATE,
+    async (_, options: PdfRotateOptions) => {
+      return rotatePdf(options);
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.PDF_WATERMARK, async (_, options: PdfWatermarkOptions) => {
-    return watermarkPdf(options);
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.PDF_WATERMARK,
+    async (_, options: PdfWatermarkOptions) => {
+      return watermarkPdf(options);
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.PDF_ENCRYPT,
+    async (_, options: PdfEncryptOptions) => {
+      return encryptPdf(options);
+    },
+  );
 
   // ==================== SETTINGS ====================
   ipcMain.handle(IPC_CHANNELS.SETTINGS_GET_ALL, async () => {
@@ -123,21 +185,24 @@ export function registerIpcHandlers(): void {
   });
 
   // ==================== SHELL ====================
-  ipcMain.handle(IPC_CHANNELS.SHELL_SHOW_ITEM_IN_FOLDER, async (_, filePath: string) => {
-    try {
-      if (!filePath) return;
-      const resolved = path.resolve(filePath);
-      shell.showItemInFolder(resolved);
-    } catch (err) {
-      console.error('Failed to show item in folder:', err);
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.SHELL_SHOW_ITEM_IN_FOLDER,
+    async (_, filePath: string) => {
+      try {
+        if (!filePath) return;
+        const normalized = path.normalize(path.resolve(filePath));
+        shell.showItemInFolder(normalized);
+      } catch (err) {
+        console.error('Failed to show item in folder:', err);
+      }
+    },
+  );
 
   ipcMain.handle(IPC_CHANNELS.SHELL_OPEN_PATH, async (_, filePath: string) => {
     try {
       if (!filePath) return 'No file path provided';
-      const resolved = path.resolve(filePath);
-      return await shell.openPath(resolved);
+      const normalized = path.normalize(path.resolve(filePath));
+      return await shell.openPath(normalized);
     } catch (err: any) {
       console.error('Failed to open path:', err);
       return err?.message || 'Failed to open file';

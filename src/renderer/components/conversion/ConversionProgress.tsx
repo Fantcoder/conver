@@ -39,7 +39,9 @@ export const ConversionProgress: React.FC = () => {
           marginBottom: '24px',
         }}
       >
-        <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+        <svg
+          style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}
+        >
           <circle
             cx="60"
             cy="60"
@@ -69,7 +71,9 @@ export const ConversionProgress: React.FC = () => {
           </defs>
         </svg>
 
-        <div style={{ position: 'absolute', fontSize: '20px', fontWeight: 700 }}>
+        <div
+          style={{ position: 'absolute', fontSize: '20px', fontWeight: 700 }}
+        >
           {pct}%
         </div>
       </div>
@@ -77,7 +81,13 @@ export const ConversionProgress: React.FC = () => {
       <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
         Converting to {activeJob.targetFormat}
       </h3>
-      <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+      <p
+        style={{
+          fontSize: '13px',
+          color: 'var(--text-secondary)',
+          marginBottom: '24px',
+        }}
+      >
         {activeJob.stage || 'Processing conversion operations...'}
       </p>
 

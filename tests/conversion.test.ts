@@ -5,9 +5,11 @@ import { inspectFile } from '../src/main/conversion/format-detection';
 import { getCapabilitiesForFile } from '../src/main/conversion/registry';
 import { processImageConversion } from '../src/main/conversion/adapters/image-adapter';
 import {
+  compressPdf,
   getPdfDetails,
   mergePdfs,
   rotatePdf,
+  splitPdf,
   watermarkPdf,
 } from '../src/main/conversion/adapters/pdf-adapter';
 import { processDataConversion } from '../src/main/conversion/adapters/data-adapter';
@@ -56,30 +58,69 @@ async function runAllTests() {
     const fileItem: FileItem = await inspectFile(testPngPath);
     assert(fileItem.category === 'image', 'Detect category as image');
     assert(fileItem.dimensions?.width === 300, 'Inspect correct width (300px)');
-    assert(fileItem.dimensions?.height === 200, 'Inspect correct height (200px)');
+    assert(
+      fileItem.dimensions?.height === 200,
+      'Inspect correct height (200px)',
+    );
 
     // ==================== TEST 2: CAPABILITY REGISTRY ====================
     console.log('\n📌 Test Group 2: Capability Registry...');
     const caps = getCapabilitiesForFile(fileItem);
-    assert(caps.length >= 8, `Image capabilities registered (Found ${caps.length})`);
-    assert(caps.some((c) => c.targetFormat === 'WebP'), 'Contains WebP capability');
-    assert(caps.some((c) => c.targetFormat === 'PDF'), 'Contains PDF capability');
-    assert(caps.some((c) => c.id === 'img-compress'), 'Contains Compress capability');
+    assert(
+      caps.length >= 8,
+      `Image capabilities registered (Found ${caps.length})`,
+    );
+    assert(
+      caps.some((c) => c.targetFormat === 'WebP'),
+      'Contains WebP capability',
+    );
+    assert(
+      caps.some((c) => c.targetFormat === 'PDF'),
+      'Contains PDF capability',
+    );
+    assert(
+      caps.some((c) => c.id === 'img-compress'),
+      'Contains Compress capability',
+    );
 
     // ==================== TEST 3: IMAGE CONVERSIONS (SHARP) ====================
     console.log('\n📌 Test Group 3: Sharp Image Conversions...');
     const webpCap = caps.find((c) => c.targetFormat === 'WebP')!;
-    const webpRes = await processImageConversion(fileItem, webpCap, { quality: 80 }, tempDir);
-    assert(fs.existsSync(webpRes.outputPath), 'PNG → WebP converted successfully');
-    assert(webpRes.outputSize > 0, `WebP file size valid (${webpRes.outputSize} bytes)`);
+    const webpRes = await processImageConversion(
+      fileItem,
+      webpCap,
+      { quality: 80 },
+      tempDir,
+    );
+    assert(
+      fs.existsSync(webpRes.outputPath),
+      'PNG → WebP converted successfully',
+    );
+    assert(
+      webpRes.outputSize > 0,
+      `WebP file size valid (${webpRes.outputSize} bytes)`,
+    );
 
     const pdfCap = caps.find((c) => c.targetFormat === 'PDF')!;
-    const imgPdfRes = await processImageConversion(fileItem, pdfCap, {}, tempDir);
-    assert(fs.existsSync(imgPdfRes.outputPath), 'Image → PDF converted successfully');
+    const imgPdfRes = await processImageConversion(
+      fileItem,
+      pdfCap,
+      {},
+      tempDir,
+    );
+    assert(
+      fs.existsSync(imgPdfRes.outputPath),
+      'Image → PDF converted successfully',
+    );
     assert(imgPdfRes.outputSize > 0, 'PDF file created from image');
 
     const resizeCap = caps.find((c) => c.id === 'img-resize')!;
-    const resizeRes = await processImageConversion(fileItem, resizeCap, { scale: 50 }, tempDir);
+    const resizeRes = await processImageConversion(
+      fileItem,
+      resizeCap,
+      { scale: 50 },
+      tempDir,
+    );
     const resizedMeta = await sharp(resizeRes.outputPath).metadata();
     assert(resizedMeta.width === 150, 'Resized width scaled to 50% (150px)');
 
@@ -101,10 +142,21 @@ async function runAllTests() {
       lossless: true,
       priority: 100,
     };
-    const csvRes = await processDataConversion(jsonFileItem, jsonToCsvCap, {}, tempDir);
-    assert(fs.existsSync(csvRes.outputPath), 'JSON → CSV converted successfully');
+    const csvRes = await processDataConversion(
+      jsonFileItem,
+      jsonToCsvCap,
+      {},
+      tempDir,
+    );
+    assert(
+      fs.existsSync(csvRes.outputPath),
+      'JSON → CSV converted successfully',
+    );
     const csvContent = await fs.promises.readFile(csvRes.outputPath, 'utf-8');
-    assert(csvContent.includes('ConvertFlow Studio'), 'CSV contains parsed records');
+    assert(
+      csvContent.includes('ConvertFlow Studio'),
+      'CSV contains parsed records',
+    );
 
     const jsonToYamlCap = {
       id: 'json-to-yaml',
@@ -119,10 +171,21 @@ async function runAllTests() {
       lossless: true,
       priority: 95,
     };
-    const yamlRes = await processDataConversion(jsonFileItem, jsonToYamlCap, {}, tempDir);
-    assert(fs.existsSync(yamlRes.outputPath), 'JSON → YAML converted successfully');
+    const yamlRes = await processDataConversion(
+      jsonFileItem,
+      jsonToYamlCap,
+      {},
+      tempDir,
+    );
+    assert(
+      fs.existsSync(yamlRes.outputPath),
+      'JSON → YAML converted successfully',
+    );
     const yamlContent = await fs.promises.readFile(yamlRes.outputPath, 'utf-8');
-    assert(yamlContent.includes('status: production'), 'YAML formatted cleanly');
+    assert(
+      yamlContent.includes('status: production'),
+      'YAML formatted cleanly',
+    );
 
     // ==================== TEST 5: DOCUMENT ADAPTER ====================
     console.log('\n📌 Test Group 5: Document & Markdown Conversions...');
@@ -142,10 +205,18 @@ async function runAllTests() {
       lossless: true,
       priority: 100,
     };
-    const htmlRes = await processDocumentConversion(mdFileItem, mdToHtmlCap, {}, tempDir);
+    const htmlRes = await processDocumentConversion(
+      mdFileItem,
+      mdToHtmlCap,
+      {},
+      tempDir,
+    );
     assert(fs.existsSync(htmlRes.outputPath), 'Markdown → HTML converted');
     const htmlContent = await fs.promises.readFile(htmlRes.outputPath, 'utf-8');
-    assert(htmlContent.includes('<h1>ConvertFlow Documentation</h1>'), 'Markdown rendered to HTML tags');
+    assert(
+      htmlContent.includes('<h1>ConvertFlow Documentation</h1>'),
+      'Markdown rendered to HTML tags',
+    );
 
     const mdToPdfCap = {
       id: 'md-to-pdf',
@@ -160,14 +231,25 @@ async function runAllTests() {
       lossless: true,
       priority: 85,
     };
-    const docPdfRes = await processDocumentConversion(mdFileItem, mdToPdfCap, {}, tempDir);
-    assert(fs.existsSync(docPdfRes.outputPath), 'Markdown → Formatted PDF document generated');
+    const docPdfRes = await processDocumentConversion(
+      mdFileItem,
+      mdToPdfCap,
+      {},
+      tempDir,
+    );
+    assert(
+      fs.existsSync(docPdfRes.outputPath),
+      'Markdown → Formatted PDF document generated',
+    );
 
     // ==================== TEST 6: PDF TOOLKIT ADAPTER ====================
     console.log('\n📌 Test Group 6: PDF Toolkit Operations...');
     const samplePdfPath = docPdfRes.outputPath;
     const details = await getPdfDetails(samplePdfPath);
-    assert(details.pageCount >= 1, `PDF details read (Page count: ${details.pageCount})`);
+    assert(
+      details.pageCount >= 1,
+      `PDF details read (Page count: ${details.pageCount})`,
+    );
 
     const rotatePath = path.join(tempDir, 'sample-rotated.pdf');
     await rotatePdf({
@@ -191,9 +273,33 @@ async function runAllTests() {
       files: [samplePdfPath, rotatePath],
       outputPath: mergePath,
     });
-    assert(fs.existsSync(mergePath), 'Multiple PDFs merged into unified document');
+    assert(
+      fs.existsSync(mergePath),
+      'Multiple PDFs merged into unified document',
+    );
     const mergedDetails = await getPdfDetails(mergePath);
-    assert(mergedDetails.pageCount >= 2, `Merged PDF has combined pages (${mergedDetails.pageCount})`);
+    assert(
+      mergedDetails.pageCount >= 2,
+      `Merged PDF has combined pages (${mergedDetails.pageCount})`,
+    );
+    const splitFiles = await splitPdf({
+      filePath: mergePath,
+      outputDir: tempDir,
+      mode: 'all',
+    });
+    assert(
+      splitFiles.length >= 2,
+      `Split PDF created ${splitFiles.length} page files`,
+    );
+    assert(fs.existsSync(splitFiles[0]), 'First split page exists on disk');
+
+    const pdfFileItem = await inspectFile(samplePdfPath);
+    const compressRes = await compressPdf(pdfFileItem, tempDir);
+    assert(
+      fs.existsSync(compressRes.outputPath),
+      'PDF compressed successfully',
+    );
+    assert(compressRes.outputSize > 0, 'Compressed PDF size valid');
 
     // ==================== TEST 7: ARCHIVE ADAPTER ====================
     console.log('\n📌 Test Group 7: Archive Compression & Extraction...');
@@ -210,8 +316,16 @@ async function runAllTests() {
       lossless: true,
       priority: 40,
     };
-    const zipRes = await processArchiveConversion(fileItem, zipCap, {}, tempDir);
-    assert(fs.existsSync(zipRes.outputPath), 'Compressed source image into ZIP archive');
+    const zipRes = await processArchiveConversion(
+      fileItem,
+      zipCap,
+      {},
+      tempDir,
+    );
+    assert(
+      fs.existsSync(zipRes.outputPath),
+      'Compressed source image into ZIP archive',
+    );
 
     const extractCap = {
       id: 'extract-archive',
@@ -227,8 +341,16 @@ async function runAllTests() {
       priority: 100,
     };
     const zipFileItem = await inspectFile(zipRes.outputPath);
-    const extractRes = await processArchiveConversion(zipFileItem, extractCap, {}, tempDir);
-    assert(fs.existsSync(extractRes.outputPath), 'Extracted ZIP contents to clean target directory');
+    const extractRes = await processArchiveConversion(
+      zipFileItem,
+      extractCap,
+      {},
+      tempDir,
+    );
+    assert(
+      fs.existsSync(extractRes.outputPath),
+      'Extracted ZIP contents to clean target directory',
+    );
 
     console.log(`\n========================================`);
     console.log(`📊 Test Suite Results: ${passed} PASSED, ${failed} FAILED`);

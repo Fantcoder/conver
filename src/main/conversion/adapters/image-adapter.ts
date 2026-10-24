@@ -23,7 +23,7 @@ export async function processImageConversion(
   capability: ConversionCapability,
   options: Record<string, any>,
   targetDir: string,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<ImageConversionResult> {
   const baseName = path.parse(file.name).name;
   let ext = capability.targetExtension.toLowerCase();
@@ -36,26 +36,13 @@ export async function processImageConversion(
     onProgress?.(40, 'Generating PDF document...');
     const outputPath = path.join(targetDir, `${baseName}.pdf`);
 
-    // Ensure image is compatible with pdf-lib (JPEG or PNG)
-    const imgPipeline = sharp(file.path);
-    const metadata = await imgPipeline.metadata();
-    const isJpegOrPng = file.extension === 'jpg' || file.extension === 'jpeg' || file.extension === 'png';
-
-    let imgBuffer: Buffer;
-    let isPng = file.extension === 'png';
-
-    if (isJpegOrPng) {
-      imgBuffer = await fs.promises.readFile(file.path);
-      isPng = file.extension === 'png';
-    } else {
-      // Transcode to PNG buffer for PDF embedding
-      imgBuffer = await sharp(file.path).png().toBuffer();
-      isPng = true;
-    }
+    // Ensure image is compatible with pdf-lib by transcoding cleanly via sharp
+    const pngBuffer = await sharp(file.path).png().toBuffer();
+    const metadata = await sharp(pngBuffer).metadata();
 
     onProgress?.(70, 'Embedding pages...');
     const pdfDoc = await PDFDocument.create();
-    const embeddedImg = isPng ? await pdfDoc.embedPng(imgBuffer) : await pdfDoc.embedJpg(imgBuffer);
+    const embeddedImg = await pdfDoc.embedPng(pngBuffer);
 
     const width = metadata.width || embeddedImg.width;
     const height = metadata.height || embeddedImg.height;
@@ -137,7 +124,12 @@ export async function processImageConversion(
       break;
     case 'ico': {
       // Create high-res PNG then save as ICO structure (or 256x256 PNG wrapped as ICO)
-      pipeline = pipeline.resize(256, 256, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png();
+      pipeline = pipeline
+        .resize(256, 256, {
+          fit: 'contain',
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png();
       break;
     }
     default:

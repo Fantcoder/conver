@@ -26,7 +26,10 @@ export const TitleBar: React.FC = () => {
 
   return (
     <header className="app-titlebar">
-      <div className="flex items-center gap-2 no-drag" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div
+        className="flex items-center gap-2 no-drag"
+        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      >
         <div
           style={{
             width: '24px',
@@ -42,7 +45,13 @@ export const TitleBar: React.FC = () => {
         >
           <Sparkles size={14} />
         </div>
-        <span style={{ fontWeight: 600, fontSize: '13px', letterSpacing: '-0.01em' }}>
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: '13px',
+            letterSpacing: '-0.01em',
+          }}
+        >
           ConvertFlow
         </span>
         <span
@@ -58,7 +67,10 @@ export const TitleBar: React.FC = () => {
       </div>
 
       {/* Window Controls */}
-      <div className="no-drag" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <div
+        className="no-drag"
+        style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+      >
         <button
           onClick={handleMinimize}
           className="btn-ghost"

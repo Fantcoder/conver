@@ -17,17 +17,20 @@
 ## ✨ Highlights & Features
 
 ### 🎡 Interactive Drag-to-Convert Radial Wheel
+
 - **Energy Laser Tether**: Dynamic vector physics beam connects your cursor to the central file card during drag interactions.
 - **Proximity Magnetic Snapping**: Nodes react dynamically with smooth scaling (`scale(1.28)`) and haptic audio cues when hovered.
 - **Synthesized Audio Engine**: Built-in Web Audio API synthesizer providing futuristic sound effects on file import, magnetic hover, and conversion launch.
 - **Celebratory Particle Canvas**: Confetti physics on conversion success.
 
 ### 🖼️ High-Performance Image Conversions
+
 - Accelerated by **Sharp** with SIMD & multi-threading.
 - Supported formats: **PNG, JPEG, WebP, AVIF, TIFF, GIF, BMP, ICO, and SVG**.
 - Advanced processing: Auto-rotation, metadata stripping, grayscale filters, and proportional resizing.
 
 ### 📑 Comprehensive PDF Toolkit
+
 - Powered locally by **pdf-lib** — 100% offline with zero cloud dependency.
 - **Merge PDFs**: Reorder, drag-and-drop, and merge multiple documents with page counts and size inspection.
 - **Split Pages**: Extract individual pages, page ranges, or split into single-page documents.
@@ -36,14 +39,17 @@
 - **PDF Compression & Encryption**: Password-protect and optimize document sizes.
 
 ### 📊 Structured Data & Document Conversions
+
 - **Data Tables**: Bidirectional conversion between **JSON ↔ CSV ↔ YAML ↔ XML**.
 - **Documents**: Seamlessly convert **Markdown (.md)**, **HTML**, and **Plain Text (.txt)** into paginated, styled PDF documents.
 
 ### 📦 Archive Utilities
+
 - Compress files and directories into **ZIP** and **TAR.GZ** archives.
 - Local high-speed extraction engine.
 
 ### 🎨 Apple-Inspired Desktop UI / UX
+
 - Custom frameless Windows TitleBar with minimize, maximize, and close controls.
 - Glassmorphic panels, dark/light theme engine, and animated status notifications.
 - Complete offline privacy: all processing takes place locally on your PC.
@@ -52,17 +58,17 @@
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies |
-| :--- | :--- |
+| Layer                 | Technologies                                              |
+| :-------------------- | :-------------------------------------------------------- |
 | **Desktop Framework** | [Electron Forge](https://www.electronforge.io/) + Webpack |
-| **UI Library** | [React 19](https://react.dev/) + TypeScript |
-| **State Management** | [Zustand](https://github.com/pmndrs/zustand) |
-| **Styling & Design** | Vanilla CSS Design Tokens (Glassmorphism, CSS Variables) |
-| **Image Engine** | [Sharp](https://sharp.pixelplumbing.com/) (Libvips, SIMD) |
-| **PDF Engine** | [pdf-lib](https://pdf-lib.js.org/) |
-| **Data Parsers** | `csv-parse`, `csv-stringify`, `js-yaml`, `xml2js` |
-| **Sound & Physics** | Web Audio API Synthesizer, `canvas-confetti` |
-| **Code Quality** | Oxlint, Oxfmt, TypeScript strict mode |
+| **UI Library**        | [React 19](https://react.dev/) + TypeScript               |
+| **State Management**  | [Zustand](https://github.com/pmndrs/zustand)              |
+| **Styling & Design**  | Vanilla CSS Design Tokens (Glassmorphism, CSS Variables)  |
+| **Image Engine**      | [Sharp](https://sharp.pixelplumbing.com/) (Libvips, SIMD) |
+| **PDF Engine**        | [pdf-lib](https://pdf-lib.js.org/)                        |
+| **Data Parsers**      | `csv-parse`, `csv-stringify`, `js-yaml`, `xml2js`         |
+| **Sound & Physics**   | Web Audio API Synthesizer, `canvas-confetti`              |
+| **Code Quality**      | Oxlint, Oxfmt, TypeScript strict mode                     |
 
 ---
 
@@ -76,12 +82,14 @@
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/Fantcoder/conver.git
    cd conver
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
@@ -96,9 +104,11 @@
 ## 📦 Build & Package
 
 - **Compile & Package Standalone Windows App:**
+
   ```bash
   npm run package
   ```
+
   Generates `out/ConvertFlow-win32-x64/ConvertFlow.exe`.
 
 - **Create Distributable Installers (Squirrel / Setup.exe / ZIP):**

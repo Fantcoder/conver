@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as archiverNamespace from 'archiver';
 import extractZip from 'extract-zip';
+import * as tar from 'tar';
 import { ConversionCapability, FileItem } from '../../../shared/types';
 
 function createArchiveStream(format: 'zip' | 'tar', options?: any): any {
@@ -31,7 +32,7 @@ export async function processArchiveConversion(
   capability: ConversionCapability,
   options: Record<string, any>,
   targetDir: string,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<ArchiveConversionResult> {
   const baseName = path.parse(file.name).name;
 
@@ -42,10 +43,18 @@ export async function processArchiveConversion(
     await fs.promises.mkdir(destFolder, { recursive: true });
 
     onProgress?.(50, 'Extracting archive contents...');
-    if (file.extension.toLowerCase() === 'zip') {
+    const extLower = file.extension.toLowerCase();
+    if (extLower === 'zip') {
       await extractZip(file.path, { dir: destFolder });
+    } else if (extLower === 'tar' || extLower === 'gz' || extLower === 'tgz') {
+      await tar.x({
+        file: file.path,
+        cwd: destFolder,
+      });
     } else {
-      throw new Error(`Extraction for ${file.extension} is not currently supported`);
+      throw new Error(
+        `Extraction for .${file.extension} is not currently supported`,
+      );
     }
 
     onProgress?.(100, 'Extraction complete');

@@ -21,7 +21,10 @@ export async function getPdfDetails(filePath: string): Promise<PdfDetails> {
   if (pageCount > 0) {
     const firstPage = pdfDoc.getPage(0);
     const size = firstPage.getSize();
-    pageSize = { width: Math.round(size.width), height: Math.round(size.height) };
+    pageSize = {
+      width: Math.round(size.width),
+      height: Math.round(size.height),
+    };
   }
 
   return {
@@ -40,7 +43,7 @@ export async function getPdfDetails(filePath: string): Promise<PdfDetails> {
 
 export async function mergePdfs(
   options: PdfMergeOptions,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<string> {
   onProgress?.(10, 'Initializing merge...');
   const mergedPdf = await PDFDocument.create();
@@ -48,7 +51,10 @@ export async function mergePdfs(
   const total = options.files.length;
   for (let i = 0; i < total; i++) {
     const file = options.files[i];
-    onProgress?.(Math.round(15 + (i / total) * 70), `Merging file ${i + 1} of ${total}...`);
+    onProgress?.(
+      Math.round(15 + (i / total) * 70),
+      `Merging file ${i + 1} of ${total}...`,
+    );
     const fileBuffer = await fs.promises.readFile(file);
     const doc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
     const copiedPages = await mergedPdf.copyPages(doc, doc.getPageIndices());
@@ -67,7 +73,7 @@ export async function mergePdfs(
 
 export async function splitPdf(
   options: PdfSplitOptions,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<string[]> {
   onProgress?.(10, 'Reading PDF document...');
   const buffer = await fs.promises.readFile(options.filePath);
@@ -78,13 +84,19 @@ export async function splitPdf(
 
   if (options.mode === 'all') {
     for (let i = 0; i < totalPages; i++) {
-      onProgress?.(Math.round(20 + (i / totalPages) * 70), `Extracting page ${i + 1} of ${totalPages}...`);
+      onProgress?.(
+        Math.round(20 + (i / totalPages) * 70),
+        `Extracting page ${i + 1} of ${totalPages}...`,
+      );
       const newDoc = await PDFDocument.create();
       const [copiedPage] = await newDoc.copyPages(doc, [i]);
       newDoc.addPage(copiedPage);
 
       const pageBytes = await newDoc.save({ useObjectStreams: true });
-      const outPath = path.join(options.outputDir, `${baseName}-page-${i + 1}.pdf`);
+      const outPath = path.join(
+        options.outputDir,
+        `${baseName}-page-${i + 1}.pdf`,
+      );
       await fs.promises.writeFile(outPath, pageBytes);
       createdFiles.push(outPath);
     }
@@ -109,7 +121,9 @@ export async function splitPdf(
       }
     }
 
-    const uniquePages = Array.from(new Set(pagesToExtract)).sort((a, b) => a - b);
+    const uniquePages = Array.from(new Set(pagesToExtract)).sort(
+      (a, b) => a - b,
+    );
     onProgress?.(50, 'Extracting selected pages...');
     const newDoc = await PDFDocument.create();
     const copied = await newDoc.copyPages(doc, uniquePages);
@@ -129,7 +143,7 @@ export async function splitPdf(
 
 export async function rotatePdf(
   options: PdfRotateOptions,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<string> {
   onProgress?.(20, 'Reading PDF document...');
   const buffer = await fs.promises.readFile(options.filePath);
@@ -137,9 +151,10 @@ export async function rotatePdf(
   const totalPages = doc.getPageCount();
 
   onProgress?.(50, 'Rotating pages...');
-  const targetPages = options.pages && options.pages.length > 0
-    ? options.pages
-    : Array.from({ length: totalPages }, (_, i) => i);
+  const targetPages =
+    options.pages && options.pages.length > 0
+      ? options.pages
+      : Array.from({ length: totalPages }, (_, i) => i);
 
   for (const pageIdx of targetPages) {
     if (pageIdx >= 0 && pageIdx < totalPages) {
@@ -159,7 +174,7 @@ export async function rotatePdf(
 
 export async function watermarkPdf(
   options: PdfWatermarkOptions,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<string> {
   onProgress?.(20, 'Loading PDF and font...');
   const buffer = await fs.promises.readFile(options.filePath);
@@ -200,7 +215,7 @@ export async function watermarkPdf(
 export async function compressPdf(
   file: FileItem,
   targetDir: string,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<{ outputPath: string; outputSize: number }> {
   onProgress?.(25, 'Loading PDF...');
   const buffer = await fs.promises.readFile(file.path);
@@ -223,7 +238,7 @@ export async function compressPdf(
 
 export async function encryptPdf(
   options: PdfEncryptOptions,
-  onProgress?: (progress: number, stage?: string) => void
+  onProgress?: (progress: number, stage?: string) => void,
 ): Promise<string> {
   onProgress?.(25, 'Loading PDF document...');
   const buffer = await fs.promises.readFile(options.filePath);

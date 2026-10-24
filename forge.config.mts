@@ -13,16 +13,14 @@ import fs from 'node:fs/promises';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
-const copyNativeDependencies = async (_forgeConfig: unknown, buildPath: string) => {
+const copyNativeDependencies = async (
+  _forgeConfig: unknown,
+  buildPath: string,
+) => {
   const targetModulesDir = path.join(buildPath, 'node_modules');
   await fs.mkdir(targetModulesDir, { recursive: true });
 
-  const modulesToCopy = [
-    'sharp',
-    '@img',
-    'detect-libc',
-    'semver',
-  ];
+  const modulesToCopy = ['sharp', '@img', 'detect-libc', 'semver'];
 
   for (const mod of modulesToCopy) {
     const src = path.join(process.cwd(), 'node_modules', mod);
@@ -38,7 +36,8 @@ const copyNativeDependencies = async (_forgeConfig: unknown, buildPath: string) 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: {
-      unpack: '{**/node_modules/sharp/**/*,**/node_modules/@img/**/*,**/*.node,**/*.dll}',
+      unpack:
+        '{**/node_modules/sharp/**/*,**/node_modules/@img/**/*,**/*.node,**/*.dll}',
     },
     name: 'ConvertFlow',
     executableName: 'ConvertFlow',
@@ -88,4 +87,3 @@ const config: ForgeConfig = {
 };
 
 export default config;
-

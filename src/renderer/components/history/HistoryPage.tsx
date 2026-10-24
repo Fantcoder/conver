@@ -12,7 +12,8 @@ import { useHistoryStore } from '../../stores/history-store';
 import { useUiStore } from '../../stores/ui-store';
 
 export const HistoryPage: React.FC = () => {
-  const { history, loadHistory, clearHistory, removeHistoryItem } = useHistoryStore();
+  const { history, loadHistory, clearHistory, removeHistoryItem } =
+    useHistoryStore();
   const { showToast } = useUiStore();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -24,7 +25,7 @@ export const HistoryPage: React.FC = () => {
     (item) =>
       item.sourceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.targetFormat.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.operationLabel.toLowerCase().includes(searchQuery.toLowerCase())
+      item.operationLabel.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const formatSize = (bytes: number) => {
@@ -36,9 +37,15 @@ export const HistoryPage: React.FC = () => {
 
   const formatDate = (timestamp: number) => {
     const d = new Date(timestamp);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) +
+    return (
+      d.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }) +
       ' • ' +
-      d.toLocaleDateString();
+      d.toLocaleDateString()
+    );
   };
 
   return (
@@ -61,7 +68,9 @@ export const HistoryPage: React.FC = () => {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '6px' }}>
+          <h1
+            style={{ fontSize: '26px', fontWeight: 700, marginBottom: '6px' }}
+          >
             Conversion History
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
@@ -70,14 +79,24 @@ export const HistoryPage: React.FC = () => {
         </div>
 
         {history.length > 0 && (
-          <button className="btn btn-ghost" style={{ color: 'var(--color-error)' }} onClick={clearHistory}>
+          <button
+            className="btn btn-ghost"
+            style={{ color: 'var(--color-error)' }}
+            onClick={clearHistory}
+          >
             <Trash2 size={15} /> Clear All History
           </button>
         )}
       </div>
 
       {history.length > 0 && (
-        <div style={{ position: 'relative', maxWidth: '420px', marginBottom: '20px' }}>
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: '420px',
+            marginBottom: '20px',
+          }}
+        >
           <Search
             size={16}
             color="var(--text-muted)"
@@ -106,9 +125,17 @@ export const HistoryPage: React.FC = () => {
             margin: '40px auto',
           }}
         >
-          <History size={40} color="var(--text-muted)" style={{ marginBottom: '14px' }} />
-          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>
-            {history.length === 0 ? 'No conversion history yet' : 'No matching records found'}
+          <History
+            size={40}
+            color="var(--text-muted)"
+            style={{ marginBottom: '14px' }}
+          />
+          <h3
+            style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}
+          >
+            {history.length === 0
+              ? 'No conversion history yet'
+              : 'No matching records found'}
           </h3>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             {history.length === 0
@@ -117,7 +144,14 @@ export const HistoryPage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '840px' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            maxWidth: '840px',
+          }}
+        >
           {filtered.map((item) => (
             <div
               key={item.id}
@@ -131,7 +165,9 @@ export const HistoryPage: React.FC = () => {
                 border: '1px solid var(--border-subtle)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '14px' }}
+              >
                 <div
                   style={{
                     width: '38px',
@@ -171,29 +207,46 @@ export const HistoryPage: React.FC = () => {
                       marginTop: '3px',
                     }}
                   >
-                    <span className="badge badge-primary">{item.sourceFormat}</span>
+                    <span className="badge badge-primary">
+                      {item.sourceFormat}
+                    </span>
                     <span>→</span>
-                    <span className="badge badge-success">{item.targetFormat}</span>
+                    <span className="badge badge-success">
+                      {item.targetFormat}
+                    </span>
                     <span>•</span>
-                    <span>{formatSize(item.outputSize || item.sourceSize)}</span>
+                    <span>
+                      {formatSize(item.outputSize || item.sourceSize)}
+                    </span>
                     <span>•</span>
                     <span>{formatDate(item.completedAt)}</span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
                 {item.status === 'completed' && item.outputPath && (
                   <>
                     <button
                       className="btn btn-ghost"
-                      style={{ padding: '6px 10px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      style={{
+                        padding: '6px 10px',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
                       title="Share Link"
                       onClick={async () => {
                         const shareUrl = `${window.location.origin}/share?id=${item.id}&file=${encodeURIComponent(item.sourceName)}`;
                         try {
                           await navigator.clipboard.writeText(shareUrl);
-                          showToast('Share link copied to clipboard!', 'success');
+                          showToast(
+                            'Share link copied to clipboard!',
+                            'success',
+                          );
                         } catch {
                           showToast('Share URL: ' + shareUrl, 'info');
                         }
@@ -203,11 +256,19 @@ export const HistoryPage: React.FC = () => {
                     </button>
                     <button
                       className="btn btn-secondary"
-                      style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
                       title="Download Converted File"
                       onClick={async () => {
                         if (window.convertFlow) {
-                          await window.convertFlow.showItemInFolder(item.outputPath);
+                          await window.convertFlow.showItemInFolder(
+                            item.outputPath,
+                          );
                         }
                         showToast(`Downloaded ${item.sourceName}`, 'success');
                       }}

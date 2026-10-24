@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import confetti from 'canvas-confetti';
-import { ConversionCapability, ConversionJob, FileItem } from '../../shared/types';
+import {
+  ConversionCapability,
+  ConversionJob,
+  FileItem,
+} from '../../shared/types';
 
 interface ConversionStore {
   files: FileItem[];
@@ -23,7 +27,13 @@ interface ConversionStore {
   cancelConversion: () => Promise<void>;
   resetConversion: () => void;
   updateJobProgress: (jobId: string, progress: number, stage?: string) => void;
-  updateJobStatus: (payload: { jobId: string; status: any; outputPath?: string; outputSize?: number; error?: string }) => void;
+  updateJobStatus: (payload: {
+    jobId: string;
+    status: any;
+    outputPath?: string;
+    outputSize?: number;
+    error?: string;
+  }) => void;
 }
 
 export const useConversionStore = create<ConversionStore>((set, get) => ({
@@ -45,7 +55,11 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
 
       const currentFiles = get().files;
       const combined = [...currentFiles, ...inspected];
-      set({ files: combined, activeFileIndex: currentFiles.length, activeJob: null });
+      set({
+        files: combined,
+        activeFileIndex: currentFiles.length,
+        activeJob: null,
+      });
 
       // Load capabilities for first new file
       const firstNew = inspected[0];
@@ -92,7 +106,10 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
 
   removeFile: (index: number) => {
     const files = get().files.filter((_, i) => i !== index);
-    const newIdx = Math.max(0, Math.min(get().activeFileIndex, files.length - 1));
+    const newIdx = Math.max(
+      0,
+      Math.min(get().activeFileIndex, files.length - 1),
+    );
     set({ files, activeFileIndex: newIdx });
     if (files.length > 0) {
       get().selectFileIndex(newIdx);
@@ -183,7 +200,10 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
 
   updateJobProgress: (jobId: string, progress: number, stage?: string) => {
     set((state) => {
-      if (state.activeJob && (state.activeJob.id === jobId || state.activeJob.id === 'pending')) {
+      if (
+        state.activeJob &&
+        (state.activeJob.id === jobId || state.activeJob.id === 'pending')
+      ) {
         return {
           activeJob: {
             ...state.activeJob,
@@ -198,7 +218,11 @@ export const useConversionStore = create<ConversionStore>((set, get) => ({
 
   updateJobStatus: (payload) => {
     set((state) => {
-      if (state.activeJob && (state.activeJob.id === payload.jobId || state.activeJob.id === 'pending')) {
+      if (
+        state.activeJob &&
+        (state.activeJob.id === payload.jobId ||
+          state.activeJob.id === 'pending')
+      ) {
         const isCompleted = payload.status === 'completed';
         if (isCompleted) {
           try {

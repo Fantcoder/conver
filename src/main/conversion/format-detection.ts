@@ -127,7 +127,26 @@ export async function inspectFile(filePath: string): Promise<FileItem> {
       else if (ft.mime === 'application/pdf') category = 'pdf';
       else if (ft.mime.startsWith('video/')) category = 'video';
       else if (ft.mime.startsWith('audio/')) category = 'audio';
-      else if (['application/zip', 'application/x-tar', 'application/gzip', 'application/x-7z-compressed'].includes(ft.mime)) {
+      else if (
+        [
+          'application/zip',
+          'application/x-tar',
+          'application/gzip',
+          'application/x-7z-compressed',
+        ].includes(ft.mime) &&
+        ![
+          'docx',
+          'doc',
+          'xlsx',
+          'xls',
+          'pptx',
+          'ppt',
+          'odt',
+          'ods',
+          'odp',
+          'epub',
+        ].includes(ext)
+      ) {
         category = 'archive';
       }
     }
@@ -147,7 +166,10 @@ export async function inspectFile(filePath: string): Promise<FileItem> {
   };
 
   // Extract metadata if image
-  if (category === 'image' && ['png', 'jpg', 'jpeg', 'webp', 'avif', 'tiff', 'gif'].includes(ext)) {
+  if (
+    category === 'image' &&
+    ['png', 'jpg', 'jpeg', 'webp', 'avif', 'tiff', 'gif'].includes(ext)
+  ) {
     try {
       const metadata = await sharp(filePath).metadata();
       if (metadata.width && metadata.height) {
@@ -170,7 +192,10 @@ export async function inspectFile(filePath: string): Promise<FileItem> {
       if (fileItem.pageCount > 0) {
         const page = pdfDoc.getPage(0);
         const { width, height } = page.getSize();
-        fileItem.dimensions = { width: Math.round(width), height: Math.round(height) };
+        fileItem.dimensions = {
+          width: Math.round(width),
+          height: Math.round(height),
+        };
       }
     } catch {
       // Ignore PDF metadata error

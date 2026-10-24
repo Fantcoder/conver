@@ -10,7 +10,7 @@ if (container) {
   root.render(
     <React.StrictMode>
       <AppShell />
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 } else {
   console.error('Failed to locate #root container element in index.html');

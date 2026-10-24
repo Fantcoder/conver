@@ -14,7 +14,12 @@ export const Sidebar: React.FC = () => {
   const { activeTab, setActiveTab } = useUiStore();
   const { files } = useConversionStore();
 
-  const navItems: { id: NavigationTab; label: string; icon: React.ReactNode; badge?: string }[] = [
+  const navItems: {
+    id: NavigationTab;
+    label: string;
+    icon: React.ReactNode;
+    badge?: string;
+  }[] = [
     {
       id: 'convert',
       label: 'Convert Studio',
@@ -61,7 +66,16 @@ export const Sidebar: React.FC = () => {
     >
       <div>
         {/* Nav Header */}
-        <div style={{ padding: '4px 12px 16px', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <div
+          style={{
+            padding: '4px 12px 16px',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+          }}
+        >
           Workspaces
         </div>
 
@@ -81,18 +95,25 @@ export const Sidebar: React.FC = () => {
                   padding: '10px 12px',
                   borderRadius: 'var(--radius-sm)',
                   border: 'none',
-                  background: isActive ? 'var(--accent-gradient-subtle)' : 'transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  background: isActive
+                    ? 'var(--accent-gradient-subtle)'
+                    : 'transparent',
+                  color: isActive
+                    ? 'var(--text-primary)'
+                    : 'var(--text-secondary)',
                   fontWeight: isActive ? 600 : 500,
                   fontSize: '13px',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   textAlign: 'left',
-                  borderLeft: isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
+                  borderLeft: isActive
+                    ? '3px solid var(--accent-primary)'
+                    : '3px solid transparent',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    e.currentTarget.style.background =
+                      'rgba(255, 255, 255, 0.05)';
                     e.currentTarget.style.color = 'var(--text-primary)';
                   }
                 }}
@@ -103,8 +124,14 @@ export const Sidebar: React.FC = () => {
                   }
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ color: isActive ? 'var(--accent-primary)' : 'inherit' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                >
+                  <span
+                    style={{
+                      color: isActive ? 'var(--accent-primary)' : 'inherit',
+                    }}
+                  >
                     {item.icon}
                   </span>
                   <span>{item.label}</span>
@@ -129,13 +156,38 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Sidebar Footer Info */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          padding: '12px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-subtle)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+          }}
+        >
           <ShieldCheck size={16} color="var(--color-success)" />
           <span style={{ fontWeight: 500 }}>100% Offline Processing</span>
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-          All files are processed locally on your PC. No clouds, no telemetry, total privacy.
+        <div
+          style={{
+            fontSize: '11px',
+            color: 'var(--text-muted)',
+            lineHeight: '1.4',
+          }}
+        >
+          All files are processed locally on your PC. No clouds, no telemetry,
+          total privacy.
         </div>
       </div>
     </aside>

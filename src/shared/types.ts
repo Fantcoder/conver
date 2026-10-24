@@ -66,7 +66,12 @@ export interface ConversionCapability {
   options?: ConversionOptionDef[];
 }
 
-export type JobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type JobStatus =
+  | 'queued'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 export interface ConversionJob {
   id: string;
@@ -168,17 +173,38 @@ export interface PdfEncryptOptions {
 
 export interface ElectronAPI {
   // File operations
-  selectFiles: (options?: { multiple?: boolean; filters?: { name: string; extensions: string[] }[] }) => Promise<string[] | null>;
+  selectFiles: (options?: {
+    multiple?: boolean;
+    filters?: { name: string; extensions: string[] }[];
+  }) => Promise<string[] | null>;
   selectDirectory: () => Promise<string | null>;
   inspectFile: (filePath: string) => Promise<FileItem>;
   inspectFiles: (filePaths: string[]) => Promise<FileItem[]>;
 
   // Capabilities & Conversion
   getCapabilities: (file: FileItem) => Promise<ConversionCapability[]>;
-  startJob: (payload: { file: FileItem; capability: ConversionCapability; options: Record<string, any> }) => Promise<string>;
+  startJob: (payload: {
+    file: FileItem;
+    capability: ConversionCapability;
+    options: Record<string, any>;
+  }) => Promise<string>;
   cancelJob: (jobId: string) => Promise<boolean>;
-  onJobProgress: (callback: (payload: { jobId: string; progress: number; stage?: string }) => void) => () => void;
-  onJobStatus: (callback: (payload: { jobId: string; status: JobStatus; outputPath?: string; outputSize?: number; error?: string }) => void) => () => void;
+  onJobProgress: (
+    callback: (payload: {
+      jobId: string;
+      progress: number;
+      stage?: string;
+    }) => void,
+  ) => () => void;
+  onJobStatus: (
+    callback: (payload: {
+      jobId: string;
+      status: JobStatus;
+      outputPath?: string;
+      outputSize?: number;
+      error?: string;
+    }) => void,
+  ) => () => void;
 
   // PDF
   getPdfDetails: (filePath: string) => Promise<PdfDetails>;
@@ -201,6 +227,8 @@ export interface ElectronAPI {
   // Shell
   showItemInFolder: (filePath: string) => Promise<void>;
   openPath: (filePath: string) => Promise<string>;
+  saveFileAs?: (sourcePath: string) => Promise<boolean>;
+  getPathForFile?: (file: File) => string;
 
   // Window
   minimizeWindow: () => Promise<void>;

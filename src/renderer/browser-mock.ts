@@ -1,11 +1,29 @@
-import { AppSettings, ElectronAPI, FileItem, HistoryItem, JobStatus } from '../shared/types';
+import {
+  AppSettings,
+  ElectronAPI,
+  FileItem,
+  HistoryItem,
+  JobStatus,
+} from '../shared/types';
 import { getCapabilitiesForFile } from '../main/conversion/registry';
 
 if (typeof window !== 'undefined' && !window.convertFlow) {
-  console.log('🌐 ConvertFlow: Initializing Browser Mock Bridge for Web Testing & Demo');
+  console.log(
+    '🌐 ConvertFlow: Initializing Browser Mock Bridge for Web Testing & Demo',
+  );
 
-  const progressListeners = new Set<(p: { jobId: string; progress: number; stage?: string }) => void>();
-  const statusListeners = new Set<(s: { jobId: string; status: JobStatus; outputPath?: string; outputSize?: number; error?: string }) => void>();
+  const progressListeners = new Set<
+    (p: { jobId: string; progress: number; stage?: string }) => void
+  >();
+  const statusListeners = new Set<
+    (s: {
+      jobId: string;
+      status: JobStatus;
+      outputPath?: string;
+      outputSize?: number;
+      error?: string;
+    }) => void
+  >();
 
   const DEFAULT_SETTINGS: AppSettings = {
     theme: 'dark',
@@ -24,7 +42,9 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
   const getStoredSettings = (): AppSettings => {
     try {
       const data = localStorage.getItem('convertflow_settings');
-      return data ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) } : DEFAULT_SETTINGS;
+      return data
+        ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) }
+        : DEFAULT_SETTINGS;
     } catch {
       return DEFAULT_SETTINGS;
     }
@@ -47,9 +67,11 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
     const header = '%PDF-1.4\n';
     const obj1 = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
     const obj2 = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
-    const obj3 = '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
+    const obj3 =
+      '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
     const obj4 = `4 0 obj\n<< /Length ${streamLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`;
-    const obj5 = '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
+    const obj5 =
+      '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
 
     const o1Offset = header.length;
     const o2Offset = o1Offset + obj1.length;
@@ -108,13 +130,23 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
           timestamp: new Date().toISOString(),
           status: 'success',
           records: [
-            { id: 1, item: 'Executive Summary', status: 'verified', sizeKb: 837 },
-            { id: 2, item: 'Financial Metrics', status: 'verified', sizeKb: 412 },
+            {
+              id: 1,
+              item: 'Executive Summary',
+              status: 'verified',
+              sizeKb: 837,
+            },
+            {
+              id: 2,
+              item: 'Financial Metrics',
+              status: 'verified',
+              sizeKb: 412,
+            },
             { id: 3, item: 'Vector Assets', status: 'verified', sizeKb: 128 },
           ],
         },
         null,
-        2
+        2,
       );
       return new Blob([json], { type: 'application/json' });
     }
@@ -153,14 +185,29 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
     return new Blob([text], { type: 'text/plain' });
   }
 
-  function getOrCreateMockBlob(filePath: string): { blob: Blob; filename: string } {
+  function getOrCreateMockBlob(filePath: string): {
+    blob: Blob;
+    filename: string;
+  } {
     const filename = filePath.split(/[\\/]/).pop() || 'converted-file.pdf';
     const ext = (filename.split('.').pop() || 'pdf').toLowerCase();
 
     if (ext === 'pdf') {
       return { blob: createValidPdfBlob(filename), filename };
     }
-    if (['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'bmp', 'avif', 'ico'].includes(ext)) {
+    if (
+      [
+        'png',
+        'jpg',
+        'jpeg',
+        'webp',
+        'svg',
+        'gif',
+        'bmp',
+        'avif',
+        'ico',
+      ].includes(ext)
+    ) {
       return { blob: createSampleImageBlob(filename, ext), filename };
     }
     return { blob: createSampleTextBlob(filename, ext), filename };
@@ -195,22 +242,55 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
       const stored = browserFileStore.get(fileName);
       const ext = (fileName.split('.').pop() || 'dat').toLowerCase();
       const isPng = ext === 'png';
+      const isImg = [
+        'png',
+        'jpg',
+        'jpeg',
+        'webp',
+        'gif',
+        'bmp',
+        'svg',
+        'avif',
+        'tiff',
+        'ico',
+      ].includes(ext);
       const isPdf = ext === 'pdf';
-      const isImg = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'svg', 'avif', 'tiff', 'ico'].includes(ext);
+      const isData = ['json', 'csv', 'yaml', 'yml', 'xml', 'tsv'].includes(ext);
+      const isArchive = ['zip', 'tar', 'gz', 'tgz', 'rar', '7z'].includes(ext);
 
       return {
         id: `file-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         name: fileName,
         path: filePath,
-        size: stored ? stored.size : (isPng ? 512000 : isPdf ? 1024000 : 256000),
+        size: stored ? stored.size : isPng ? 512000 : isPdf ? 1024000 : 256000,
         extension: ext,
-        mimeType: stored?.type || (isPng ? 'image/png' : isPdf ? 'application/pdf' : 'application/octet-stream'),
-        category: isPdf ? 'pdf' : isImg ? 'image' : 'document',
+        mimeType:
+          stored?.type ||
+          (isPng
+            ? 'image/png'
+            : isPdf
+              ? 'application/pdf'
+              : isData
+                ? 'application/json'
+                : isArchive
+                  ? 'application/zip'
+                  : 'text/plain'),
+        category: isPdf
+          ? 'pdf'
+          : isImg
+            ? 'image'
+            : isData
+              ? 'data'
+              : isArchive
+                ? 'archive'
+                : 'document',
         lastModified: stored ? stored.lastModified : Date.now(),
         dimensions: isImg ? { width: 1920, height: 1080 } : undefined,
         pageCount: isPdf ? 1 : undefined,
       };
     },
+
+    getPathForFile: (file: File) => (file as any).path || file.name,
 
     inspectFiles: async (filePaths: string[]) => {
       return Promise.all(filePaths.map((fp) => mockApi.inspectFile(fp)));
@@ -232,12 +312,16 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
         step += 25;
         if (step < 100) {
           progressListeners.forEach((fn) =>
-            fn({ jobId, progress: step, stage: `Transforming ${capability.targetFormat} (${step}%)...` })
+            fn({
+              jobId,
+              progress: step,
+              stage: `Transforming ${capability.targetFormat} (${step}%)...`,
+            }),
           );
         } else {
           clearInterval(interval);
           progressListeners.forEach((fn) =>
-            fn({ jobId, progress: 100, stage: 'Finalizing converted file...' })
+            fn({ jobId, progress: 100, stage: 'Finalizing converted file...' }),
           );
 
           statusListeners.forEach((fn) =>
@@ -246,7 +330,7 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
               status: 'completed',
               outputPath,
               outputSize,
-            })
+            }),
           );
 
           // Add to local history
@@ -264,7 +348,10 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
             completedAt: Date.now(),
             status: 'completed',
           });
-          localStorage.setItem('convertflow_history', JSON.stringify(history.slice(0, 100)));
+          localStorage.setItem(
+            'convertflow_history',
+            JSON.stringify(history.slice(0, 100)),
+          );
         }
       }, 300);
 
@@ -275,12 +362,16 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
 
     onJobProgress: (callback) => {
       progressListeners.add(callback);
-      return () => { progressListeners.delete(callback); };
+      return () => {
+        progressListeners.delete(callback);
+      };
     },
 
     onJobStatus: (callback) => {
       statusListeners.add(callback);
-      return () => { statusListeners.delete(callback); };
+      return () => {
+        statusListeners.delete(callback);
+      };
     },
 
     getPdfDetails: async () => ({
@@ -326,7 +417,10 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
     },
 
     showItemInFolder: async (fp: string) => {
-      console.log('🌐 ConvertFlow: Showing file in folder (triggering browser download):', fp);
+      console.log(
+        '🌐 ConvertFlow: Showing file in folder (triggering browser download):',
+        fp,
+      );
       try {
         const item = getOrCreateMockBlob(fp);
         const blobUrl = URL.createObjectURL(item.blob);
@@ -371,6 +465,11 @@ if (typeof window !== 'undefined' && !window.convertFlow) {
         console.error('Failed to open file in browser:', err);
         return err?.message || 'Failed to open file';
       }
+    },
+
+    saveFileAs: async (sourcePath: string) => {
+      await mockApi.showItemInFolder(sourcePath);
+      return true;
     },
 
     minimizeWindow: async () => console.log('Minimize window'),

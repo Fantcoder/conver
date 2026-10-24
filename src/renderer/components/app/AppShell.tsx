@@ -4,16 +4,16 @@ import { Sidebar } from './Sidebar';
 import { ConvertPage } from '../conversion/ConvertPage';
 
 const PdfWorkspace = lazy(() =>
-  import('../pdf/PdfWorkspace').then((m) => ({ default: m.PdfWorkspace }))
+  import('../pdf/PdfWorkspace').then((m) => ({ default: m.PdfWorkspace })),
 );
 const BatchPanel = lazy(() =>
-  import('../batch/BatchPanel').then((m) => ({ default: m.BatchPanel }))
+  import('../batch/BatchPanel').then((m) => ({ default: m.BatchPanel })),
 );
 const HistoryPage = lazy(() =>
-  import('../history/HistoryPage').then((m) => ({ default: m.HistoryPage }))
+  import('../history/HistoryPage').then((m) => ({ default: m.HistoryPage })),
 );
 const SettingsPage = lazy(() =>
-  import('../settings/SettingsPage').then((m) => ({ default: m.SettingsPage }))
+  import('../settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
 
 import { useUiStore } from '../../stores/ui-store';
@@ -48,7 +48,8 @@ const LoadingFallback: React.FC = () => (
 );
 
 export const AppShell: React.FC = () => {
-  const { activeTab, setActiveTab, toasts, removeToast, showToast } = useUiStore();
+  const { activeTab, setActiveTab, toasts, removeToast, showToast } =
+    useUiStore();
   const {
     loadFilesFromPaths,
     updateJobProgress,
@@ -84,7 +85,13 @@ export const AppShell: React.FC = () => {
         unsubStatus();
       };
     }
-  }, [loadSettings, loadHistory, updateJobProgress, updateJobStatus, showToast]);
+  }, [
+    loadSettings,
+    loadHistory,
+    updateJobProgress,
+    updateJobStatus,
+    showToast,
+  ]);
 
   // Global window drop listener: dropping anywhere switches to convert tab & loads file!
   useEffect(() => {
@@ -107,7 +114,15 @@ export const AppShell: React.FC = () => {
 
       if (e.dataTransfer && e.dataTransfer.files.length > 0) {
         const paths = Array.from(e.dataTransfer.files)
-          .map((f: any) => f.path || f.name)
+          .map((f: File) => {
+            if (window.convertFlow?.getPathForFile) {
+              try {
+                const p = window.convertFlow.getPathForFile(f);
+                if (p) return p;
+              } catch {}
+            }
+            return (f as any).path || f.name;
+          })
           .filter(Boolean);
         if (paths.length > 0) {
           setActiveTab('convert');
@@ -210,20 +225,20 @@ export const AppShell: React.FC = () => {
                 t.type === 'success'
                   ? 'var(--color-success-bg)'
                   : t.type === 'error'
-                  ? 'var(--color-error-bg)'
-                  : 'var(--bg-card)',
+                    ? 'var(--color-error-bg)'
+                    : 'var(--bg-card)',
               color:
                 t.type === 'success'
                   ? 'var(--color-success)'
                   : t.type === 'error'
-                  ? 'var(--color-error)'
-                  : 'var(--text-primary)',
+                    ? 'var(--color-error)'
+                    : 'var(--text-primary)',
               border: `1px solid ${
                 t.type === 'success'
                   ? 'rgba(16, 185, 129, 0.3)'
                   : t.type === 'error'
-                  ? 'rgba(239, 68, 68, 0.3)'
-                  : 'var(--border-medium)'
+                    ? 'rgba(239, 68, 68, 0.3)'
+                    : 'var(--border-medium)'
               }`,
               boxShadow: 'var(--shadow-md)',
               backdropFilter: 'blur(12px)',

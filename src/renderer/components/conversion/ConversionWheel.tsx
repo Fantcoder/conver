@@ -39,7 +39,9 @@ export const ConversionWheel: React.FC = () => {
   const { settings } = useSettingsStore();
 
   // Drag-to-convert state
-  const [dragOffset, setDragOffset] = useState<{ x: number; y: number } | null>(null);
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [isPointerDragging, setIsPointerDragging] = useState(false);
   const [magnetTargetId, setMagnetTargetId] = useState<string | null>(null);
   const [isAbsorbing, setIsAbsorbing] = useState(false);
@@ -216,11 +218,15 @@ export const ConversionWheel: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        const idx = capabilities.findIndex((c) => c.id === selectedCapability?.id);
+        const idx = capabilities.findIndex(
+          (c) => c.id === selectedCapability?.id,
+        );
         const nextIdx = (idx + 1) % capabilities.length;
         selectCapability(capabilities[nextIdx]);
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        const idx = capabilities.findIndex((c) => c.id === selectedCapability?.id);
+        const idx = capabilities.findIndex(
+          (c) => c.id === selectedCapability?.id,
+        );
         const prevIdx = (idx - 1 + capabilities.length) % capabilities.length;
         selectCapability(capabilities[prevIdx]);
       } else if (e.key === 'Enter') {
@@ -269,7 +275,9 @@ export const ConversionWheel: React.FC = () => {
               >
                 <ChevronLeft size={16} />
               </button>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <span
+                style={{ fontSize: '13px', color: 'var(--text-secondary)' }}
+              >
                 File {activeFileIndex + 1} of {files.length}
               </span>
               <button
@@ -357,7 +365,13 @@ export const ConversionWheel: React.FC = () => {
             }}
           >
             <defs>
-              <linearGradient id="laserGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient
+                id="laserGrad"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
                 <stop offset="0%" stopColor="#6366f1" />
                 <stop offset="50%" stopColor="#a855f7" />
                 <stop offset="100%" stopColor="#ec4899" />
@@ -434,26 +448,32 @@ export const ConversionWheel: React.FC = () => {
                   background: isAttracted
                     ? 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)'
                     : isSelected
-                    ? 'var(--accent-gradient)'
-                    : 'var(--bg-card)',
-                  color: isAttracted || isSelected ? '#ffffff' : 'var(--text-primary)',
+                      ? 'var(--accent-gradient)'
+                      : 'var(--bg-card)',
+                  color:
+                    isAttracted || isSelected
+                      ? '#ffffff'
+                      : 'var(--text-primary)',
                   boxShadow: isAttracted
                     ? '0 0 35px #a855f7, 0 0 70px rgba(168, 85, 247, 0.6)'
                     : isSelected
-                    ? '0 6px 24px var(--accent-glow)'
-                    : 'var(--shadow-sm)',
+                      ? '0 6px 24px var(--accent-glow)'
+                      : 'var(--shadow-sm)',
                   border: isAttracted
                     ? '2px solid #ffffff'
                     : isSelected
-                    ? '1px solid rgba(255, 255, 255, 0.5)'
-                    : '1px solid var(--border-subtle)',
+                      ? '1px solid rgba(255, 255, 255, 0.5)'
+                      : '1px solid var(--border-subtle)',
                   whiteSpace: 'nowrap',
                   backdropFilter: 'blur(12px)',
                 }}
               >
                 <span
                   style={{
-                    color: isAttracted || isSelected ? '#ffffff' : 'var(--accent-primary)',
+                    color:
+                      isAttracted || isSelected
+                        ? '#ffffff'
+                        : 'var(--accent-primary)',
                     transform: isAttracted ? 'scale(1.2)' : 'none',
                     transition: 'transform 0.15s ease',
                   }}
@@ -517,7 +537,13 @@ export const ConversionWheel: React.FC = () => {
               zIndex: 20,
             }}
           >
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'var(--text-muted)',
+                fontWeight: 600,
+              }}
+            >
               Drop onto any format node
             </div>
           </div>
@@ -602,7 +628,9 @@ export const ConversionWheel: React.FC = () => {
 
           {/* Badges */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span className="badge badge-primary">{currentFile.extension.toUpperCase()}</span>
+            <span className="badge badge-primary">
+              {currentFile.extension.toUpperCase()}
+            </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
               {formatSize(currentFile.size)}
             </span>
@@ -610,13 +638,15 @@ export const ConversionWheel: React.FC = () => {
 
           {currentFile.dimensions && (
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-              {currentFile.dimensions.width} × {currentFile.dimensions.height} px
+              {currentFile.dimensions.width} × {currentFile.dimensions.height}{' '}
+              px
             </div>
           )}
 
           {currentFile.pageCount && (
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-              {currentFile.pageCount} {currentFile.pageCount === 1 ? 'Page' : 'Pages'}
+              {currentFile.pageCount}{' '}
+              {currentFile.pageCount === 1 ? 'Page' : 'Pages'}
             </div>
           )}
 
@@ -641,7 +671,11 @@ export const ConversionWheel: React.FC = () => {
             }}
           >
             <Move size={11} />
-            <span>{isPointerDragging ? 'Drop on any format node' : 'Drag to format to convert'}</span>
+            <span>
+              {isPointerDragging
+                ? 'Drop on any format node'
+                : 'Drag to format to convert'}
+            </span>
           </div>
         </div>
       </div>
@@ -663,75 +697,130 @@ export const ConversionWheel: React.FC = () => {
           }}
         >
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '4px',
+              }}
+            >
               <span style={{ fontWeight: 600, fontSize: '15px' }}>
                 {selectedCapability.label}
               </span>
-              <span className="badge badge-primary">{selectedCapability.targetFormat}</span>
+              <span className="badge badge-primary">
+                {selectedCapability.targetFormat}
+              </span>
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+            <p
+              style={{
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                margin: 0,
+              }}
+            >
               {selectedCapability.description}
             </p>
 
             {/* In-line option inputs if any */}
-            {selectedCapability.options && selectedCapability.options.length > 0 && (
-              <div style={{ marginTop: '12px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                {selectedCapability.options.map((opt) => (
-                  <div key={opt.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '140px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
-                      <span>{opt.label}</span>
+            {selectedCapability.options &&
+              selectedCapability.options.length > 0 && (
+                <div
+                  style={{
+                    marginTop: '12px',
+                    display: 'flex',
+                    gap: '16px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {selectedCapability.options.map((opt) => (
+                    <div
+                      key={opt.id}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                        minWidth: '140px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '11px',
+                          color: 'var(--text-muted)',
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {opt.type === 'slider' && (
+                          <span>
+                            {options[opt.id] ?? opt.defaultValue}
+                            {opt.unit}
+                          </span>
+                        )}
+                      </div>
                       {opt.type === 'slider' && (
-                        <span>{options[opt.id] ?? opt.defaultValue}{opt.unit}</span>
+                        <input
+                          type="range"
+                          min={opt.min ?? 10}
+                          max={opt.max ?? 100}
+                          step={opt.step ?? 5}
+                          value={options[opt.id] ?? opt.defaultValue}
+                          onChange={(e) =>
+                            setOption(opt.id, Number(e.target.value))
+                          }
+                        />
+                      )}
+                      {opt.type === 'toggle' && (
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={Boolean(
+                              options[opt.id] ?? opt.defaultValue,
+                            )}
+                            onChange={(e) =>
+                              setOption(opt.id, e.target.checked)
+                            }
+                          />
+                          <span>Enable {opt.label}</span>
+                        </label>
+                      )}
+                      {opt.type === 'select' && (
+                        <select
+                          className="input-field"
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                          value={options[opt.id] ?? opt.defaultValue}
+                          onChange={(e) => setOption(opt.id, e.target.value)}
+                        >
+                          {opt.options?.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {opt.type === 'text' && (
+                        <input
+                          type="text"
+                          className="input-field"
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                          value={options[opt.id] ?? opt.defaultValue}
+                          onChange={(e) => setOption(opt.id, e.target.value)}
+                          placeholder={opt.description || opt.label}
+                        />
                       )}
                     </div>
-                    {opt.type === 'slider' && (
-                      <input
-                        type="range"
-                        min={opt.min ?? 10}
-                        max={opt.max ?? 100}
-                        step={opt.step ?? 5}
-                        value={options[opt.id] ?? opt.defaultValue}
-                        onChange={(e) => setOption(opt.id, Number(e.target.value))}
-                      />
-                    )}
-                    {opt.type === 'toggle' && (
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(options[opt.id] ?? opt.defaultValue)}
-                          onChange={(e) => setOption(opt.id, e.target.checked)}
-                        />
-                        <span>Enable {opt.label}</span>
-                      </label>
-                    )}
-                    {opt.type === 'select' && (
-                      <select
-                        className="input-field"
-                        style={{ padding: '4px 8px', fontSize: '12px' }}
-                        value={options[opt.id] ?? opt.defaultValue}
-                        onChange={(e) => setOption(opt.id, e.target.value)}
-                      >
-                        {opt.options?.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    {opt.type === 'text' && (
-                      <input
-                        type="text"
-                        className="input-field"
-                        style={{ padding: '4px 8px', fontSize: '12px' }}
-                        value={options[opt.id] ?? opt.defaultValue}
-                        onChange={(e) => setOption(opt.id, e.target.value)}
-                        placeholder={opt.description || opt.label}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
           </div>
 
           <button

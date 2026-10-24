@@ -4,6 +4,7 @@ export const IPC_CHANNELS = {
   FILE_INSPECT: 'file:inspect',
   FILE_INSPECT_MANY: 'file:inspect-many',
   FILE_GET_THUMBNAIL: 'file:get-thumbnail',
+  FILE_SAVE_COPY: 'file:save-copy',
 
   // Capabilities & Conversion
   GET_CAPABILITIES: 'convert:get-capabilities',

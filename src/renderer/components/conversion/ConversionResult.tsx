@@ -6,14 +6,23 @@ import {
   Share2,
   Check,
   RotateCcw,
+  ExternalLink,
+  FolderOpen,
 } from 'lucide-react';
 import { useConversionStore } from '../../stores/conversion-store';
 import { useUiStore } from '../../stores/ui-store';
 import { sounds } from '../../utils/audio';
 
 function getBlobForJob(activeJob: any): { blob: Blob; filename: string } {
-  const targetExt = (activeJob.capability?.targetExtension || activeJob.targetFormat || 'pdf').toLowerCase();
-  const baseName = (activeJob.sourceFile?.name || 'converted-document').replace(/\.[^/.]+$/, '');
+  const targetExt = (
+    activeJob.capability?.targetExtension ||
+    activeJob.targetFormat ||
+    'pdf'
+  ).toLowerCase();
+  const baseName = (activeJob.sourceFile?.name || 'converted-document').replace(
+    /\.[^/.]+$/,
+    '',
+  );
   const filename = `${baseName}.${targetExt}`;
 
   if (targetExt === 'pdf') {
@@ -25,9 +34,11 @@ function getBlobForJob(activeJob: any): { blob: Blob; filename: string } {
     const header = '%PDF-1.4\n';
     const obj1 = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
     const obj2 = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
-    const obj3 = '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
+    const obj3 =
+      '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n';
     const obj4 = `4 0 obj\n<< /Length ${streamLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`;
-    const obj5 = '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
+    const obj5 =
+      '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n';
 
     const o1Offset = header.length;
     const o2Offset = o1Offset + obj1.length;
@@ -46,7 +57,11 @@ function getBlobForJob(activeJob: any): { blob: Blob; filename: string } {
     return { blob: new Blob([fullPdf], { type: 'application/pdf' }), filename };
   }
 
-  if (['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'bmp', 'avif', 'ico'].includes(targetExt)) {
+  if (
+    ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'bmp', 'avif', 'ico'].includes(
+      targetExt,
+    )
+  ) {
     const cleanName = filename.replace(/[<>&"']/g, '');
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
       <defs>
@@ -73,7 +88,12 @@ function getBlobForJob(activeJob: any): { blob: Blob; filename: string } {
       <text x="555" y="353" fill="#818cf8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="13" font-weight="600" text-anchor="middle">OPTIMIZED -65%</text>
       <text x="480" y="470" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="12" text-anchor="middle">Converted via ConvertFlow Local Engine • ${new Date().toLocaleDateString()}</text>
     </svg>`;
-    return { blob: new Blob([svg], { type: targetExt === 'svg' ? 'image/svg+xml' : 'image/png' }), filename };
+    return {
+      blob: new Blob([svg], {
+        type: targetExt === 'svg' ? 'image/svg+xml' : 'image/png',
+      }),
+      filename,
+    };
   }
 
   if (targetExt === 'json') {
@@ -88,7 +108,7 @@ function getBlobForJob(activeJob: any): { blob: Blob; filename: string } {
         status: 'completed',
       },
       null,
-      2
+      2,
     );
     return { blob: new Blob([json], { type: 'application/json' }), filename };
   }
@@ -118,11 +138,23 @@ export const ConversionResult: React.FC = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const handleDownloadFile = () => {
+  const handleDownloadFile = async () => {
     if (!activeJob) return;
     try {
       setDownloading(true);
       sounds.playImport();
+
+      // Electron Native Save Dialog for real converted file on disk
+      if (window.convertFlow?.saveFileAs && activeJob.outputPath) {
+        const saved = await window.convertFlow.saveFileAs(activeJob.outputPath);
+        setDownloading(false);
+        if (saved) {
+          showToast('Converted file saved successfully!', 'success');
+        }
+        return;
+      }
+
+      // Browser fallback download
       const { blob, filename } = getBlobForJob(activeJob);
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -140,6 +172,30 @@ export const ConversionResult: React.FC = () => {
     } catch (e: any) {
       setDownloading(false);
       showToast(e?.message || 'Download failed', 'error');
+    }
+  };
+
+  const handleOpenFile = async () => {
+    if (!activeJob?.outputPath || !window.convertFlow) return;
+    try {
+      const err = await window.convertFlow.openPath(activeJob.outputPath);
+      if (err) {
+        showToast(err, 'error');
+      } else {
+        showToast('Opened converted file in default application', 'success');
+      }
+    } catch (e: any) {
+      showToast(e?.message || 'Failed to open file', 'error');
+    }
+  };
+
+  const handleShowInFolder = async () => {
+    if (!activeJob?.outputPath || !window.convertFlow) return;
+    try {
+      await window.convertFlow.showItemInFolder(activeJob.outputPath);
+      showToast('Revealed file in folder', 'success');
+    } catch (e: any) {
+      showToast(e?.message || 'Failed to open folder', 'error');
     }
   };
 
@@ -183,9 +239,10 @@ export const ConversionResult: React.FC = () => {
 
   const originalSize = activeJob.sourceFile.size;
   const outputSize = activeJob.outputSize || 0;
-  const diffPercent = originalSize > 0
-    ? Math.round(((originalSize - outputSize) / originalSize) * 100)
-    : 0;
+  const diffPercent =
+    originalSize > 0
+      ? Math.round(((originalSize - outputSize) / originalSize) * 100)
+      : 0;
 
   return (
     <div
@@ -226,11 +283,22 @@ export const ConversionResult: React.FC = () => {
             <CheckCircle2 size={36} />
           </div>
 
-          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px' }}>
+          <h2
+            style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px' }}
+          >
             Conversion Succeeded!
           </h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-            Successfully converted to <strong style={{ color: 'var(--text-primary)' }}>{activeJob.targetFormat}</strong>
+          <p
+            style={{
+              fontSize: '13px',
+              color: 'var(--text-secondary)',
+              marginBottom: '24px',
+            }}
+          >
+            Successfully converted to{' '}
+            <strong style={{ color: 'var(--text-primary)' }}>
+              {activeJob.targetFormat}
+            </strong>
           </p>
 
           {/* Size Comparison Card */}
@@ -248,33 +316,101 @@ export const ConversionResult: React.FC = () => {
             }}
           >
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Original Size</div>
-              <div style={{ fontSize: '15px', fontWeight: 600 }}>{formatSize(originalSize)}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                Original Size
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 600 }}>
+                {formatSize(originalSize)}
+              </div>
             </div>
 
-            <div style={{ fontSize: '18px', color: 'var(--text-muted)' }}>→</div>
+            <div style={{ fontSize: '18px', color: 'var(--text-muted)' }}>
+              →
+            </div>
 
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Output Size</div>
-              <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-success)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                Output Size
+              </div>
+              <div
+                style={{
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  color: 'var(--color-success)',
+                }}
+              >
                 {formatSize(outputSize)}
               </div>
             </div>
 
             {diffPercent > 0 && (
-              <span className="badge badge-success" style={{ fontSize: '11px' }}>
+              <span
+                className="badge badge-success"
+                style={{ fontSize: '11px' }}
+              >
                 -{diffPercent}% Saved
               </span>
             )}
           </div>
 
+          {/* Real Output File Location Info */}
+          {activeJob.outputPath && (
+            <div
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                fontSize: '12px',
+                textAlign: 'left',
+              }}
+            >
+              <div
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                }}
+              >
+                <span
+                  style={{ color: 'var(--text-muted)', marginRight: '6px' }}
+                >
+                  Saved at:
+                </span>
+                <span
+                  style={{
+                    color: 'var(--color-primary)',
+                    fontFamily: 'monospace',
+                    fontWeight: 500,
+                  }}
+                >
+                  {activeJob.outputPath}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
             <button
               type="button"
               className="btn btn-primary"
               style={{
-                padding: '10px 22px',
+                padding: '10px 20px',
                 borderRadius: 'var(--radius-full)',
                 display: 'flex',
                 alignItems: 'center',
@@ -283,16 +419,56 @@ export const ConversionResult: React.FC = () => {
                 cursor: 'pointer',
               }}
               onClick={handleDownloadFile}
-              title="Download Converted File"
+              title="Save a copy of the converted file"
             >
               <Download size={16} />
-              {downloading ? 'Downloading...' : 'Download File'}
+              {downloading ? 'Saving...' : 'Download File'}
             </button>
+
+            {activeJob.outputPath && (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: 'var(--radius-full)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={handleOpenFile}
+                  title="Open converted file in default application"
+                >
+                  <ExternalLink size={16} />
+                  Open File
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: 'var(--radius-full)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={handleShowInFolder}
+                  title="Show file location in file explorer"
+                >
+                  <FolderOpen size={16} />
+                  Show in Folder
+                </button>
+              </>
+            )}
+
             <button
               type="button"
               className="btn btn-secondary"
               style={{
-                padding: '10px 20px',
+                padding: '10px 18px',
                 borderRadius: 'var(--radius-full)',
                 display: 'flex',
                 alignItems: 'center',
@@ -302,14 +478,19 @@ export const ConversionResult: React.FC = () => {
               onClick={handleShareLink}
               title="Copy Share Link"
             >
-              {copied ? <Check size={16} color="var(--color-success)" /> : <Share2 size={16} />}
+              {copied ? (
+                <Check size={16} color="var(--color-success)" />
+              ) : (
+                <Share2 size={16} />
+              )}
               {copied ? 'Link Copied!' : 'Share Link'}
             </button>
+
             <button
               type="button"
               className="btn btn-ghost"
               style={{
-                padding: '10px 20px',
+                padding: '10px 18px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -341,11 +522,21 @@ export const ConversionResult: React.FC = () => {
             <AlertTriangle size={36} />
           </div>
 
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
+          <h2
+            style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}
+          >
             Conversion Failed
           </h2>
-          <p style={{ fontSize: '13px', color: 'var(--color-error)', maxWidth: '400px', marginBottom: '24px' }}>
-            {activeJob.error || 'An unexpected error occurred during processing.'}
+          <p
+            style={{
+              fontSize: '13px',
+              color: 'var(--color-error)',
+              maxWidth: '400px',
+              marginBottom: '24px',
+            }}
+          >
+            {activeJob.error ||
+              'An unexpected error occurred during processing.'}
           </p>
 
           <button

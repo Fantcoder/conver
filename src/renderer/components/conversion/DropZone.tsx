@@ -29,7 +29,17 @@ export const DropZone: React.FC = () => {
 
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      const paths = files.map((f: any) => f.path || f.name).filter(Boolean);
+      const paths = files
+        .map((f: File) => {
+          if (window.convertFlow?.getPathForFile) {
+            try {
+              const p = window.convertFlow.getPathForFile(f);
+              if (p) return p;
+            } catch {}
+          }
+          return (f as any).path || f.name;
+        })
+        .filter(Boolean);
       if (paths.length > 0) {
         sounds.playImport();
         await loadFilesFromPaths(paths);
@@ -94,14 +104,26 @@ export const DropZone: React.FC = () => {
       <h2 style={{ fontSize: '22px', fontWeight: 600, marginBottom: '8px' }}>
         Drop any file here to convert
       </h2>
-      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', maxWidth: '420px', marginBottom: '24px' }}>
-        Drop photos, PDFs, documents, data spreadsheets, or archives. The interactive conversion wheel will appear automatically.
+      <p
+        style={{
+          fontSize: '14px',
+          color: 'var(--text-secondary)',
+          maxWidth: '420px',
+          marginBottom: '24px',
+        }}
+      >
+        Drop photos, PDFs, documents, data spreadsheets, or archives. The
+        interactive conversion wheel will appear automatically.
       </p>
 
       <button
         type="button"
         className="btn btn-primary"
-        style={{ padding: '10px 24px', fontSize: '14px', borderRadius: 'var(--radius-full)' }}
+        style={{
+          padding: '10px 24px',
+          fontSize: '14px',
+          borderRadius: 'var(--radius-full)',
+        }}
         onClick={(e) => {
           e.stopPropagation();
           handleBrowse();
@@ -122,7 +144,19 @@ export const DropZone: React.FC = () => {
           maxWidth: '560px',
         }}
       >
-        {['PNG', 'JPG', 'WEBP', 'AVIF', 'PDF', 'CSV', 'JSON', 'YAML', 'XML', 'ZIP', 'MARKDOWN'].map((fmt) => (
+        {[
+          'PNG',
+          'JPG',
+          'WEBP',
+          'AVIF',
+          'PDF',
+          'CSV',
+          'JSON',
+          'YAML',
+          'XML',
+          'ZIP',
+          'MARKDOWN',
+        ].map((fmt) => (
           <span
             key={fmt}
             style={{

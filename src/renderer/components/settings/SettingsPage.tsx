@@ -1,16 +1,11 @@
 import React, { useEffect } from 'react';
-import {
-  Folder,
-  Moon,
-  Sun,
-  Sliders,
-  Info,
-} from 'lucide-react';
+import { Folder, Moon, Sun, Sliders, Info } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settings-store';
 import { useUiStore } from '../../stores/ui-store';
 
 export const SettingsPage: React.FC = () => {
-  const { settings, loadSettings, updateSettings, chooseOutputDir } = useSettingsStore();
+  const { settings, loadSettings, updateSettings, chooseOutputDir } =
+    useSettingsStore();
   const { showToast } = useUiStore();
 
   useEffect(() => {
@@ -38,37 +33,73 @@ export const SettingsPage: React.FC = () => {
           Preferences & Settings
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-          Configure output folder destinations, conversion quality presets, and application appearance.
+          Configure output folder destinations, conversion quality presets, and
+          application appearance.
         </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '680px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px',
+          maxWidth: '680px',
+        }}
+      >
         {/* Output Directory Section */}
         <div
           className="glass-panel"
-          style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+          style={{
+            padding: '22px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px',
+          }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Folder size={20} color="var(--accent-primary)" />
-            <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Output Destination</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600 }}>
+              Output Destination
+            </h3>
           </div>
 
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            Choose where converted documents and media should be saved on your system.
+            Choose where converted documents and media should be saved on your
+            system.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
               <input
                 type="radio"
                 name="outputDirMode"
                 checked={!settings.outputDirectory}
                 onChange={() => updateSettings({ outputDirectory: '' })}
               />
-              <span>Save converted files in the same folder as the original file</span>
+              <span>
+                Save converted files in the same folder as the original file
+              </span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
               <input
                 type="radio"
                 name="outputDirMode"
@@ -81,7 +112,14 @@ export const SettingsPage: React.FC = () => {
             </label>
 
             {settings.outputDirectory && (
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '6px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '10px',
+                  alignItems: 'center',
+                  marginTop: '6px',
+                }}
+              >
                 <input
                   type="text"
                   className="input-field"
@@ -89,7 +127,11 @@ export const SettingsPage: React.FC = () => {
                   value={settings.outputDirectory}
                   style={{ fontSize: '12px' }}
                 />
-                <button className="btn btn-secondary" style={{ whiteSpace: 'nowrap' }} onClick={chooseOutputDir}>
+                <button
+                  className="btn btn-secondary"
+                  style={{ whiteSpace: 'nowrap' }}
+                  onClick={chooseOutputDir}
+                >
                   Change Folder
                 </button>
               </div>
@@ -100,11 +142,18 @@ export const SettingsPage: React.FC = () => {
         {/* Appearance Section */}
         <div
           className="glass-panel"
-          style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+          style={{
+            padding: '22px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px',
+          }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Moon size={20} color="var(--accent-primary)" />
-            <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Theme Appearance</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600 }}>
+              Theme Appearance
+            </h3>
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -128,17 +177,33 @@ export const SettingsPage: React.FC = () => {
         {/* Quality Presets */}
         <div
           className="glass-panel"
-          style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '16px' }}
+          style={{
+            padding: '22px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+          }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Sliders size={20} color="var(--accent-primary)" />
-            <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Default Quality Presets</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600 }}>
+              Default Quality Presets
+            </h3>
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '13px',
+                marginBottom: '8px',
+              }}
+            >
               <span>Default Image Quality (WebP / JPG / AVIF)</span>
-              <strong style={{ color: 'var(--accent-primary)' }}>{settings.defaultImageQuality}%</strong>
+              <strong style={{ color: 'var(--accent-primary)' }}>
+                {settings.defaultImageQuality}%
+              </strong>
             </div>
             <input
               type="range"
@@ -146,27 +211,60 @@ export const SettingsPage: React.FC = () => {
               max={100}
               step={5}
               value={settings.defaultImageQuality}
-              onChange={(e) => updateSettings({ defaultImageQuality: Number(e.target.value) })}
+              onChange={(e) =>
+                updateSettings({ defaultImageQuality: Number(e.target.value) })
+              }
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              marginTop: '8px',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={settings.soundEnabled}
-                onChange={(e) => updateSettings({ soundEnabled: e.target.checked })}
+                onChange={(e) =>
+                  updateSettings({ soundEnabled: e.target.checked })
+                }
               />
-              <span>Play completion sound effect upon successful conversion</span>
+              <span>
+                Play completion sound effect upon successful conversion
+              </span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={settings.overwriteExisting}
-                onChange={(e) => updateSettings({ overwriteExisting: e.target.checked })}
+                onChange={(e) =>
+                  updateSettings({ overwriteExisting: e.target.checked })
+                }
               />
-              <span>Overwrite existing files automatically without prompting</span>
+              <span>
+                Overwrite existing files automatically without prompting
+              </span>
             </label>
           </div>
         </div>
