@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "ConvertFlow Studio",
+    "version": "1.0.0",
+    "status": "production",
+    "category": "Desktop Application"
+  },
+  {
+    "id": 2,
+    "name": "Radial Wheel Engine",
+    "version": "2.1.0",
+    "status": "active",
+    "category": "UI Component"
+  },
+  {
+    "id": 3,
+    "name": "PDF Toolkit Suite",
+    "version": "1.5.0",
+    "status": "active",
+    "category": "Document Engine"
+  }
+]
